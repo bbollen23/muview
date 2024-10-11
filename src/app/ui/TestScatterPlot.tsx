@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
@@ -35,9 +35,8 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
 
 
     const { theme } = useTheme();
-    const [data, setData] = useState(initialData);
 
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const spec: any = {
         "$schema": "https://vega.github.io/schema/vega/v5.json",
         "width": 450,
@@ -246,16 +245,6 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
         ],
     }
 
-
-
-
-
-    const handleClick = (view: any) => {
-        // Add signal listener to vega chart
-        view.addSignalListener('clickBar', (name: any, value: any) => {
-            // Start given animation
-        });
-    };
 
     return (
         <Vega

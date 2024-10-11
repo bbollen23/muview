@@ -4,7 +4,7 @@ import TestScatterPlot from "@/app/ui/TestScatterPlot";
 import styles from "./page.module.css";
 import { Icon, Tabs, Scrollable, Button } from "@bbollen23/brutal-paper";
 import Link from 'next/link';
-import { type Publication, type DataStoreState, type DataStore } from '../../stores/data-store'
+import { type Publication, type DataStore } from '../../stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
 
 interface TabData {
@@ -21,10 +21,9 @@ export default function Dashboard({ }) {
     return (
       <Scrollable width="100%" height="calc(100vh - 220px)">
         <div className={styles.dataContainer}>
-
           {publicationsSelected.map((publication: Publication, idx: number) => {
             return (
-              <div className={styles.chartContainer}>
+              <div key={publication.id} className={styles.chartContainer}>
                 <div>
                   <div className={styles.header}>
                     <Icon icon="bi bi-house" />
@@ -49,7 +48,7 @@ export default function Dashboard({ }) {
         <div className={styles.dataContainer}>
           {publicationsSelected.map((publication: Publication, idx: number) => {
             return (
-              <div className={styles.chartContainer}>
+              <div key={publication.id} className={styles.chartContainer}>
                 <div>
                   <div className={styles.header}>
                     <Icon icon="bi bi-house" />

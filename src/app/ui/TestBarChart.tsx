@@ -1,7 +1,6 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { Vega } from "react-vega";
-import { View } from 'vega';
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -30,9 +29,12 @@ const cubicEaseOut = (t: number) => {
 
 // const signalListeners = { clickBar: handleClick };
 
+
 const TestBarChart = ({ chartIndex }: TestBarChartProps): JSX.Element => {
 
     const { theme } = useTheme();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [randomData, setRandomData] = useState<any>(null);
 
     const initialData = [
@@ -58,7 +60,7 @@ const TestBarChart = ({ chartIndex }: TestBarChartProps): JSX.Element => {
         { 'label': true, 'isNew': false, "category": "9.6-10", "value": 3 },
     ]
 
-    const handleClick = (name: any, value: any) => {
+    const handleClick = () => {
         generateRandomSubset();
         requestAnimationFrame(animateBars)
     };
@@ -67,7 +69,7 @@ const TestBarChart = ({ chartIndex }: TestBarChartProps): JSX.Element => {
 
     const [data, setData] = useState(initialData);
 
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const spec: any = {
         "$schema": "https://vega.github.io/schema/vega/v5.json",
         "width": 450,
@@ -205,13 +207,13 @@ const TestBarChart = ({ chartIndex }: TestBarChartProps): JSX.Element => {
     const generateRandomSubset = () => {
 
         const subsetSize = Math.ceil(Math.random() * 20);
-        let originalData = [...initialData];
-        let shuffled = originalData.sort(() => 0.5 - Math.random());
-        let selectedSubset = shuffled.slice(0, subsetSize);
+        const originalData = [...initialData];
+        const shuffled = originalData.sort(() => 0.5 - Math.random());
+        const selectedSubset = shuffled.slice(0, subsetSize);
 
         // Modify the selected subset: reduce value and set isNew to true
-        let newSubset = selectedSubset.map(entry => {
-            let reducedValue = Math.floor(Math.random() * entry.value);  // Generate a random value less than original
+        const newSubset = selectedSubset.map(entry => {
+            const reducedValue = Math.floor(Math.random() * entry.value);  // Generate a random value less than original
             if (reducedValue > 0) {
                 return {
                     ...entry,
@@ -226,7 +228,8 @@ const TestBarChart = ({ chartIndex }: TestBarChartProps): JSX.Element => {
 
     const addData = (scale: number) => {
         if (randomData) {
-            let tempNewData = randomData.map((entry: any) => { return { ...entry, "value": entry.value * scale, "label": false } })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tempNewData = randomData.map((entry: any) => { return { ...entry, "value": entry.value * scale, "label": false } })
             setData([
                 ...initialData,
                 ...tempNewData

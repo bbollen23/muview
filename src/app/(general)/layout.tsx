@@ -7,7 +7,6 @@ import {
     Header,
     Button,
     HeaderGroup,
-    Icon,
     HeaderItem,
     HeaderTitle
 } from "@bbollen23/brutal-paper";

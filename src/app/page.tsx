@@ -1,7 +1,7 @@
 'use client'
 
 import styles from "./page.module.css";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   Layout,
@@ -9,7 +9,6 @@ import {
   Header,
   Button,
   HeaderGroup,
-  Icon,
   HeaderItem
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from "@/app/ui/ThemeToggle";

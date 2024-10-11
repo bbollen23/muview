@@ -1,11 +1,6 @@
 // Check if we are running in the browser
 const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
 
-const stripVar = (_string: string): string => {
-    const result = _string.replace(/^var\((.*)\)$/, '$1');
-    return result;
-}
-
 // HSL to RGB conversion function
 const hslToRgb = (hsl: string): string | null => {
     // let tempHsl = hsl;
@@ -15,19 +10,18 @@ const hslToRgb = (hsl: string): string | null => {
     const plainHslRegex = /^\s*([\d.]+)\s*,?\s*([\d.]+)%\s*,?\s*([\d.]+)%?\s*$/; // Regex for plain HSL (with/without commas)
 
 
-    let result = hslRegex.exec(hsl) || plainHslRegex.exec(hsl);
+    const result = hslRegex.exec(hsl) || plainHslRegex.exec(hsl);
 
     if (!result) {
         return null;
     }
 
-    let h = Number(result[1]);
-    let s = Number(result[2]) / 100;
-    let l = Number(result[3]) / 100;
-
-    let c = (1 - Math.abs(2 * l - 1)) * s;
-    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
-    let m = l - c / 2;
+    const h = Number(result[1]);
+    const s = Number(result[2]) / 100;
+    const l = Number(result[3]) / 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
     let r = 0, g = 0, b = 0;
 
     if (h >= 0 && h < 60) {
@@ -55,7 +49,7 @@ const hslToRgb = (hsl: string): string | null => {
 // Function to safely get a CSS variable value and convert it to RGB
 export const getCSSVariableValue = (variableName: string, theme: string): string | null => {
     if (isBrowser) {
-        let hslValue = getComputedStyle(document.documentElement).getPropertyValue(`${variableName}-${theme}`).trim();
+        const hslValue = getComputedStyle(document.documentElement).getPropertyValue(`${variableName}-${theme}`).trim();
 
         return hslToRgb(hslValue); // Convert HSL to RGB
     }

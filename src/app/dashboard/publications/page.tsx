@@ -1,6 +1,6 @@
 'use client'
 import styles from "./page.module.css";
-import { Button, Card, Icon, Input, Scrollable } from "@bbollen23/brutal-paper";
+import { Button, Card, Input, Scrollable } from "@bbollen23/brutal-paper";
 import { type Publication, type DataStore } from '../../../stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
 

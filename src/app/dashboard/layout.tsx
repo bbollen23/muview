@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from "./layout.module.css";
@@ -10,12 +10,9 @@ import {
     Header,
     HeaderItem,
     Button,
-    LoadingOverlay,
     HeaderTitle,
     Icon,
     HeaderGroup,
-    useNotification,
-    NotificationType,
     Drawer,
     DrawerHeader,
     DrawerItem,
@@ -25,37 +22,19 @@ import ThemeToggle from '@/app/ui/ThemeToggle';
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const { notify } = useNotification();
     const pathname = usePathname();
     const router = useRouter();
     const name = pathname.split('/').pop() || 'home';
     const pageName = name.charAt(0).toUpperCase() + name.slice(1)
 
-    const notifyTypes: NotificationType['type'][] = ['alert', 'info', 'warning', 'success']
-    const notifyMessages: string[] = ['Danger Danger! Oh no!!', 'Just letting you know', 'Be careful!', 'Sweet!']
-    const [notifyIndex, setNotifyIndex] = useState<number>(0);
     const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
-    // const [pageName, setPageName] = useState<string>('');
 
     const toggleDrawer = () => {
         setDrawerOpened((prev) => !prev);
     }
 
-    const [loading, setLoading] = useState<boolean>(false);
-
-
-    const handleNotify = () => {
-        notify({
-            message: notifyMessages[notifyIndex],
-            type: notifyTypes[notifyIndex]
-        })
-
-        setNotifyIndex(prev => (prev + 1) % 4);
-    }
-
     return (
         <Layout className='no-right-margin no-left-margin no-footer'>
-            <LoadingOverlay visible={false} />
             <Header>
                 <HeaderTitle><Icon icon='bi bi-list' onClick={toggleDrawer} style={{ marginRight: '10px' }} /><Link href="/">MuView</Link></HeaderTitle>
                 <HeaderGroup alignment="right">
