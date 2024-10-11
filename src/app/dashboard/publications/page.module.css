@@ -1,0 +1,13 @@
+.publicationsContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.innerPublicationsContainer:first-child {
+    border-right: 1px solid var(--theme-border-color);
+}
+
+
+.innerPublicationsContainer h2 {
+    margin-left: 20px;
+}

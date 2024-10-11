@@ -1,6 +1,23 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "bootstrap-icons/font/bootstrap-icons.css"
+import { Inter, Roboto_Condensed } from 'next/font/google'
+import Providers from "./providers";
+import { DataStoreProvider } from "@/providers/data-store-provider";
+
+// If loading a variable font, you don't need to specify the font weight
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: "--font-inter"
+})
+
+const roboto_condensed = Roboto_Condensed({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: "--font-roboto-condensed"
+})
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,9 +42,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${roboto_condensed.variable}`}>
+        <Providers>
+          <DataStoreProvider>
+            {children}
+          </DataStoreProvider>
+        </Providers>
       </body>
     </html>
+
   );
 }
