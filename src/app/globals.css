@@ -33,3 +33,9 @@ a {
 .bp-layout.no-right-margin.no-left-margin .bp-header .bp-header-group.right {
     grid-column: 4;
 } */
+
+/* 
+.dark-mode .bp-tooltip {
+    background-color: hsl(var(--zinc-400)) !important;
+    color: hsl(var(--gray-900)) !important;
+} */

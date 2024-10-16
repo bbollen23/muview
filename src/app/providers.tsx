@@ -2,7 +2,7 @@
 "use client"; // This directive tells Next.js this component is client-side
 
 import React from 'react';
-import { NotificationProvider } from "@bbollen23/brutal-paper";
+import { NotificationProvider, Notifications } from "@bbollen23/brutal-paper";
 import { ThemeProvider } from '@/providers/theme-provider';
 // import { DataStoreProvider } from '@/providers/data-store-provider';
 
@@ -14,6 +14,7 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps): JSX.Element => {
     return (
         <NotificationProvider>
+            <Notifications />
             <ThemeProvider>
                 {children}
             </ThemeProvider>

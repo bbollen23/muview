@@ -3,38 +3,74 @@ import React from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
+import type { Ranking } from '../lib/definitions';
+import { useDataStore } from "@/providers/data-store-provider";
 
-interface TestScatterPlotProps {
-    chartIndex: number
+
+interface ScatterPlotProps {
+    rankingData: Ranking[],
+    publication_id: number
+}
+
+interface BrushSelectionData {
+    x1: number,
+    x2: number,
+    y1: number,
+    y2: number
 }
 
 
-const chartColorSchemes =
-    [
-        "#2563EB", //blue 600
-        "#65A30D", // lime 600
-        "#C026D3", // Fuchsia 600
-        "#0D9488", // teal 600
-        "#0EA5E9", // sky 500
-        "#E11D48", // rose 600
-    ]
+const ScatterPlot = ({ publication_id, rankingData }: ScatterPlotProps): JSX.Element => {
 
+    const setLoadingAlbums = useDataStore((state) => state.setLoadingAlbums);
+    const addAlbums = useDataStore((state) => state.addAlbums);
+    const removeAlbums = useDataStore((state) => state.removeAlbums);
+    const albumsSelected = useDataStore((state) => state.albumsSelected);
+    const addAlbumsRankings = useDataStore((state) => state.addAlbumsRankings)
+    const publicationsSelected = useDataStore((state) => state.publicationsSelected);
+    const chartColorScheme = useDataStore((state => state.chartColorScheme))
 
-const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
+    console.log(rankingData);
 
-    const initialData = [
-        { 'label': true, 'isNew': false, "ranking": 2, "score": 9 },
-        { 'label': true, 'isNew': false, "ranking": 3, "score": 9.2 },
-        { 'label': true, 'isNew': false, "ranking": 12, "score": 7.8 },
-        { 'label': true, 'isNew': false, "ranking": 7, "score": 8.1 },
-        { 'label': true, 'isNew': false, "ranking": 34, "score": 6.2 },
-        { 'label': true, 'isNew': false, "ranking": 45, "score": 8.9 },
-        { 'label': true, 'isNew': false, "ranking": 72, "score": 8.3 },
-
-    ]
+    const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
 
 
     const { theme } = useTheme();
+
+
+    // What should happen for notification when we switch brushing?? Find difference somehow?
+    // How should we handle cancelling brush?
+    // How should we handle highlighting when albums have already been selected from distribution??
+
+    const handleBrushedData = async (name: string, value: any) => {
+        setLoadingAlbums(true);
+
+        const { x1, x2, y1, y2 } = value as BrushSelectionData;
+        const album_ids = rankingData.filter((ranking: Ranking) => {
+            return ranking.rank >= Math.min(x1, x2) && ranking.rank <= Math.max(x1, x2)
+                && ranking.score >= Math.min(y1, y2) && ranking.score <= Math.max(y1, y2);
+        }).map((entry: Ranking) => entry.album_id);
+
+        if (album_ids.length > 0) {
+            const response = await fetch(`/api/albums?album_ids=${album_ids}`);
+            if (!response.ok) {
+                console.error('Error fetching album data');
+                return
+            }
+
+            const data = await response.json();
+            addAlbumsRankings(data.albums, publication_id);
+        }
+        setLoadingAlbums(false);
+        // addAlbums(data.albums, value.bin0, value.bin1, publication_id);
+
+
+    }
+
+
+    const signalListeners = {
+        "brushedData": handleBrushedData
+    };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const spec: any = {
@@ -43,7 +79,7 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
         "height": 275,
         "data": {
             "name": "table",
-            "values": initialData
+            "values": rankingData
         },
         "autosize": {
             "type": "none",
@@ -63,17 +99,18 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
                 "round": true,
                 "nice": true,
                 "zero": true,
-                "domain": { "data": "table", "field": "ranking" },
-                "range": "width"
+                "domain": { "data": "table", "field": "rank" },
+                "range": "width",
+                "reverse": true
             },
             {
                 "name": "yscale",
                 "type": "linear",
                 "round": true,
                 "nice": true,
-                "zero": true,
+                "zero": false,
                 "domain": { "data": "table", "field": "score" },
-                "range": "height"
+                "range": "height",
             }
         ],
 
@@ -81,10 +118,10 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
             {
                 "orient": "bottom",
                 "scale": "xscale",
-                "labelColor": `${getCSSVariableValue('--theme-text-color', theme)}`,
+                "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "labelPadding": 10,
                 "title": "Year End Ranking",  // Add the title property for the x-axis
-                "titleColor": `${getCSSVariableValue('--theme-text-color', theme)}`,
+                "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "titlePadding": 10,
                 "titleFontSize": 16,        // Set the font size
                 "titleFont": "'Inconsolata', sans-serif",
@@ -93,17 +130,17 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
             {
                 "orient": "left",
                 "scale": "yscale",
-                "labelColor": `${getCSSVariableValue('--theme-text-color', theme)}`,
+                "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "labelPadding": 2,
                 "title": "Original Score",  // Add the title property for the x-axis
-                "titleColor": `${getCSSVariableValue('--theme-text-color', theme)}`,
+                "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "titlePadding": 10,
                 "titleFontSize": 16,        // Set the font size
                 "titleFont": "'Inconsolata', sans-serif",
                 "grid": true,
                 "gridDash": [4, 4],
                 "gridOpacity": 0.2,
-                "gridColor": `${getCSSVariableValue('--theme-text-color', theme)}`,
+                "gridColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "tickCount": 10
             }
         ],
@@ -130,16 +167,15 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
                 "from": { "data": "table" },
                 "encode": {
                     "enter": {
-                        "x": { "scale": "xscale", "field": "ranking" },
+                        "x": { "scale": "xscale", "field": "rank" },
                         "y": { "scale": "yscale", "field": "score" },
                         "size": { "value": 100 },
-                        "fill": { "value": `${chartColorSchemes[chartIndex % 6]}` },
+                        "fill": { "value": color },
                         "stroke": { "value": "black" }
                     },
                     "update": {
-
                         "fillOpacity": {
-                            "signal": "scale('xscale', datum.ranking) >= min(brush.x, brush.x + brush.width) && scale('xscale', datum.ranking) <= max(brush.x, brush.x + brush.width) && scale('yscale', datum.score) >= min(brush.y, brush.y + brush.height) && scale('yscale', datum.score) <= max(brush.y, brush.y + brush.height)  ? 1 : brush.width && abs(brush.width) > 3 ? 0.3 : 1 "
+                            "signal": "scale('xscale', datum.rank) >= min(brush.x, brush.x + brush.width) && scale('xscale', datum.rank) <= max(brush.x, brush.x + brush.width) && scale('yscale', datum.score) >= min(brush.y, brush.y + brush.height) && scale('yscale', datum.score) <= max(brush.y, brush.y + brush.height)  ? 1 : brush.width && abs(brush.width) > 3 ? 0.3 : 1 "
                         },
 
                     }
@@ -234,12 +270,21 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
                     }
                 ]
             },
-
+            {
+                "name": "brushedData",
+                "value": {},
+                "on": [
+                    {
+                        "events": "mouseup",
+                        "update": "{x1:invert('xscale', brush.x), y1:invert('yscale', brush.y), x2:invert('xscale', brush.x + brush.width), y2:invert('yscale', brush.y + brush.height)}"
+                    }
+                ]
+            },
             {
                 "name": "clickPoint",
                 "value": null,
                 "on": [
-                    { "events": "symbol:click", "update": "datum.ranking" }
+                    { "events": "symbol:click", "update": "datum.rank" }
                 ]
             }
         ],
@@ -249,9 +294,11 @@ const TestScatterPlot = ({ chartIndex }: TestScatterPlotProps): JSX.Element => {
     return (
         <Vega
             spec={spec}
-            actions={false} />
+            actions={false}
+            signalListeners={signalListeners}
+        />
     );
 
 }
 
-export default TestScatterPlot;
+export default ScatterPlot;

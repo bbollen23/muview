@@ -1,0 +1,114 @@
+.albumsContainer {
+    box-sizing: border-box;
+    display: column;
+}
+
+.albumsContainer .loadingAlbumsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.albumsContainer .album {
+    display: flex;
+    flex-direction: row;
+    padding: 10px 0px 10px 20px;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.albumsContainer .album:hover {
+    background-color: var(--bp-theme-item-hover-color);
+}
+
+.albumsContainer .album .left {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.albumsContainer .album .left .info {
+    display: flex;
+    flex-direction: column;
+}
+
+.img {
+    width: 50px;
+    height: 50px;
+    border: 1px solid var(--bp-theme-border-color);
+    font-size: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.albumsContainer .album .left .albumTitle {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.albumsContainer .album .left .artist {
+    font-size: 0.8rem;
+}
+
+.albumToolTip {
+    width: 500px;
+    height: 300px;
+    background-color: var(--bp-theme-card-background-color);
+    color: var(--bp-theme-text-color);
+    padding: 5px;
+    border-radius: 4px;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    border: 2px solid var(--bp-theme-card-border-color);
+    padding: 10px;
+    z-index: 1000;
+    position: absolute;
+
+    flex-direction: column;
+    display: flex;
+}
+
+.reviewSection {
+    margin-top: 20px;
+    border-top: 1px solid var(--bp-theme-border-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex: 1;
+}
+
+.review {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.score {
+    background-color: var(--bp-theme-card-shadow-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+
+
+.albumSelectorArea {
+    margin-left: 20px;
+    display: flex;
+    border-bottom: 1px solid var(--bp-theme-border-color);
+    flex: 1;
+    flex-direction: column;
+    padding-bottom: 5px;
+}

@@ -4,7 +4,7 @@
 }
 
 .innerPublicationsContainer:first-child {
-    border-right: 1px solid var(--theme-border-color);
+    border-right: 1px solid var(--bp-theme-border-color);
 }
 
 

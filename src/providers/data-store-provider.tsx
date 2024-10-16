@@ -24,8 +24,10 @@ export const DataStoreProvider = ({
         storeRef.current = createDataStore(initDataStore())
     }
 
+    const getState = () => storeRef.current!.getState();
+
     return (
-        <DataStoreContext.Provider value={storeRef.current}>
+        <DataStoreContext.Provider value={{ ...storeRef.current, getState }}>
             {children}
         </DataStoreContext.Provider>
     )
@@ -41,4 +43,14 @@ export const useDataStore = <T,>(
     }
 
     return useStore(dataStoreContext, selector)
+}
+
+export const useDataStoreGetState = (): (() => DataStore) => {
+    const dataStoreContext = useContext(DataStoreContext);
+
+    if (!dataStoreContext) {
+        throw new Error(`useDataStore must be used within DataStoreProvider`);
+    }
+
+    return dataStoreContext.getState; // Return the getState method directly
 }

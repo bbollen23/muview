@@ -23,3 +23,7 @@
     display: flex;
     flex-direction: column;
 }
+
+.albumListAreaContainer {
+    border-left: 1px solid var(--bp-theme-border-color);
+}

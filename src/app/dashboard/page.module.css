@@ -7,18 +7,16 @@
     justify-content: center;
 }
 
-.albumsContainer {
-    box-sizing: border-box;
-}
+
 
 .chartContainer {
     width: calc(50% - 30px);
     min-width: 500px;
     /* width:50%; */
-    border: 2px solid var(--theme-card-border-color);
+    border: 2px solid var(--bp-theme-card-border-color);
     border-radius: 2px;
-    background-color: var(--theme-card-background-color);
-    box-shadow: 4px 4px 0px var(--theme-card-shadow-color);
+    background-color: var(--bp-theme-card-background-color);
+    box-shadow: 4px 4px 0px var(--bp-theme-card-shadow-color);
     padding: 10px;
     display: flex;
     justify-content: center;
@@ -34,7 +32,7 @@
 
 .chartContainer .header .publicationName {
     font-weight: bold;
-    font-family: var(--theme-font-family-title);
+    font-family: var(--bp-theme-font-family-title);
     font-size: 1.2rem;
 }
 

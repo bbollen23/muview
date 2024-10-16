@@ -1,11 +1,13 @@
 'use client'
-import TestBarChart from "@/app/ui/TestBarChart";
-import TestScatterPlot from "@/app/ui/TestScatterPlot";
+import BarChart from "@/app/ui/BarChart";
+import ScatterPlot from "@/app/ui/ScatterPlot";
 import styles from "./page.module.css";
 import { Icon, Tabs, Scrollable, Button } from "@bbollen23/brutal-paper";
 import Link from 'next/link';
-import { type Publication, type DataStore } from '../../stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
+import type { Publication } from "../lib/definitions";
+import { useEffect } from "react";
+import useSWR from "swr";
 
 interface TabData {
   label: string,
@@ -14,8 +16,58 @@ interface TabData {
 
 export default function Dashboard({ }) {
 
+  const reviews = useDataStore((state) => state.reviews);
+  const rankings = useDataStore((state) => state.rankings);
+  const publicationsSelected = useDataStore((state) => state.publicationsSelected);
+  const addReviews = useDataStore((state) => state.addReviews);
+  const removeReviews = useDataStore((state) => state.removeReviews);
+  const addRankings = useDataStore((state) => state.addRankings);
+  const removeRankings = useDataStore((state) => state.removeRankings);
+  const loading = useDataStore((state) => state.loading);
+  const setLoading = useDataStore((state) => state.setLoading)
 
-  const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected)
+  const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+  // Determines the set of pub ids that have already been fetched
+  const current_fetched_pub_ids = Object.keys(reviews).map(Number);
+
+  // Gets the pub ids that have been added and not fetched
+  const new_pub_ids = publicationsSelected.filter((pub: Publication) => !(current_fetched_pub_ids.includes(pub.id))).map((new_pub: Publication) => new_pub.id)
+
+  // Gets the pub ids that are not longer needed.
+  const removed_pub_ids = current_fetched_pub_ids.filter((pub_id: number) => !(publicationsSelected.map((pub: Publication) => pub.id).includes(pub_id)))
+
+  const { data, error } = useSWR(
+    new_pub_ids.length > 0 ? `/api/reviews?publication_ids=${new_pub_ids.join(',')}` : null,
+    fetcher
+  );
+
+
+  useEffect(() => {
+    if (new_pub_ids.length > 0 && !data && !loading) {
+      setLoading(true);
+    }
+
+    if (removed_pub_ids.length > 0) {
+      removed_pub_ids.forEach((pub_id: number) => {
+        removeReviews(pub_id);
+        removeRankings(pub_id);
+      })
+    }
+
+    if (data) {
+      addReviews(data.newReviews);
+      addRankings(data.newRankings);
+      if (loading) {
+        setLoading(false);
+      }
+    }
+
+    if (error) {
+      console.error('Error fetching reviews and or rankings: ', error)
+    }
+
+  }, [data, new_pub_ids, error, removed_pub_ids]);
 
   const ReviewDistributionComponent = () => {
     return (
@@ -31,7 +83,7 @@ export default function Dashboard({ }) {
                       {publication.name}
                     </div>
                   </div>
-                  <TestBarChart chartIndex={idx} />
+                  <BarChart reviewData={reviews[publication.id]} publication_id={publication.id} />
                 </div>
               </div>
             )
@@ -56,7 +108,7 @@ export default function Dashboard({ }) {
                       {publication.name}
                     </div>
                   </div>
-                  <TestScatterPlot chartIndex={idx} />
+                  {rankings[publication.id] && rankings[publication.id].length > 0 ? <ScatterPlot publication_id={publication.id} rankingData={rankings[publication.id]} /> : <div style={{ width: '450px', height: '275px', display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}><div style={{ marginTop: '-80px' }}>There is no year-end ranking data for {publication.name}.</div></div>}
                 </div>
               </div>
             )
@@ -92,6 +144,5 @@ export default function Dashboard({ }) {
   return (
     <Tabs tabData={tabsData}>
     </Tabs>
-
   );
 }
