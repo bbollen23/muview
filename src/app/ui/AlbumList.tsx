@@ -46,14 +46,10 @@ const AlbumList = () => {
 
     const selectedAlbumIds = useDataStore((state: DataStore) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state: DataStore) => state.selectedAlbumIdsRankings)
-    const loadingAlbums = useDataStore((state: DataStore) => state.loadingAlbums);
-    const albumsSelected = useDataStore((state: DataStore) => state.albumsSelected);
-    const albumsSelectedRankings = useDataStore((state: DataStore) => state.albumsSelectedRankings);
 
     const reviews = useDataStore((state: DataStore) => state.reviews);
     const rankings = useDataStore((state: DataStore) => state.rankings);
 
-    const flatRankings = Object.values(rankings).flat();
 
     const flatAlbumIds = getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings);
     const { data, isLoading, error } = useSWR(
@@ -97,30 +93,10 @@ const AlbumList = () => {
         return rankingsArray;
     }
 
-
-    // const getReviews = (album: Album): Review[] => {
-    //     let reviews: Review[] = [];
-    //     flatReviews.forEach((review: Review) => {
-    //         if (review.album_id === album.id) {
-    //             reviews.push(review)
-    //         }
-    //     })
-    //     return reviews;
-    // }
-
-    // const getRankings = (album: Album): Ranking[] => {
-    //     let rankings: Ranking[] = [];
-    //     flatRankings.forEach((ranking: Ranking) => {
-    //         if (ranking.album_id === album.id) {
-    //             rankings.push(ranking)
-    //         }
-    //     })
-    //     return rankings;
-    // }
-
-
     const [searchTermAlbum, setSearchTermAlbum] = useState<string>('');
     const previousAlbumListRef = useRef<Album[]>([]); // or whatever type albumList is
+    const [totalAlbums, setTotalAlbums] = useState<Album[]>([]);
+    const albumList: Album[] = totalAlbums.filter((entry: Album) => entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) || entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase()))
 
     // Can use unique list instead of list of albums. Will be easier.
     useEffect(() => {
@@ -149,6 +125,9 @@ const AlbumList = () => {
             }
 
             previousAlbumListRef.current = data.albums;
+
+            //For searching
+            setTotalAlbums(data.albums);
         }
 
 
@@ -160,13 +139,14 @@ const AlbumList = () => {
 
 
 
+
     return (
 
         <div className={styles.albumsContainer}>
             <div className={styles.albumSelectorArea}>
                 <Input label="Search" placeholder="Search Albums" value={searchTermAlbum} onChange={handleSearchTermAlbumChange} />
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {/* <b>Showing {`${albumList.length}/${totalAlbumList.length}`} Albums</b> */}
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {data && data.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <div></div>}
                     <div style={{ display: 'flex' }}>
                         <Tooltip size="sm" content='Clear albums'><Icon icon='bi bi-trash' size='sm' /></Tooltip>
                         <Tooltip size="sm" content='Download as CSV'><Icon icon='bi bi-download' size='sm' /></Tooltip>
@@ -182,16 +162,12 @@ const AlbumList = () => {
                     <div className={styles.loadingAlbumsContainer}>
                         <div style={{ fontSize: '1.2rem;' }}>Loading</div><LoadingIcon visible={true} />
                     </div>
-                    : data && data.albums.length > 0 ?
-                        data.albums.map((album: Album) => {
-                            return (
-                                // <div></div>
-                                <AlbumElement key={album.id} album={album} reviews={getReviews(album)} rankings={getRankings(album)} />
-                            )
-                        })
-                        :
-                        <div>
-                        </div>
+                    : albumList.map((album: Album) => {
+                        return (
+                            // <div></div>
+                            <AlbumElement key={album.id} album={album} reviews={getReviews(album)} rankings={getRankings(album)} />
+                        )
+                    })
                 }
             </Scrollable>
 
