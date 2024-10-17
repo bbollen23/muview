@@ -67,7 +67,7 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     // const setLoadingAlbums = useDataStore((state) => state.setLoadingAlbums);
     // const addAlbums = useDataStore((state) => state.addAlbums);
     // const removeAlbums = useDataStore((state) => state.removeAlbums);
-    const albumsSelected = useDataStore((state) => state.albumsSelected);
+    // const albumsSelected = useDataStore((state) => state.albumsSelected);
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state => state.chartColorScheme));
     const addReviews = useDataStore((state => state.addReviews))
@@ -130,24 +130,24 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     };
 
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        // Handle initializing clicked bar marks when navigating back to page
-        if (!(publication_id in albumsSelected)) {
-            return
-        }
-        let barsSelected: BarData[] = [];
-        Object.keys(albumsSelected[publication_id]).forEach((bin) => {
-            const bins = bin.split(',').map(Number)
-            barsSelected.push({
-                "bin0": bins[0],
-                "bin1": bins[1],
-                "count": albumsSelected[publication_id][bin].length
-            })
-        })
-        setClickedData(barsSelected);
+    //     // Handle initializing clicked bar marks when navigating back to page
+    //     if (!(publication_id in albumsSelected)) {
+    //         return
+    //     }
+    //     let barsSelected: BarData[] = [];
+    //     Object.keys(albumsSelected[publication_id]).forEach((bin) => {
+    //         const bins = bin.split(',').map(Number)
+    //         barsSelected.push({
+    //             "bin0": bins[0],
+    //             "bin1": bins[1],
+    //             "count": albumsSelected[publication_id][bin].length
+    //         })
+    //     })
+    //     setClickedData(barsSelected);
 
-    }, [])
+    // }, [])
 
     useEffect(() => {
         if (data) {

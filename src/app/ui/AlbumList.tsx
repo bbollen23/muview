@@ -3,7 +3,7 @@ import styles from "./albumsList.module.css";
 import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip } from "@bbollen23/brutal-paper";
 import { type DataStore } from '../../stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, AlbumsSelected, Review, AlbumsSelectedRankings, Ranking, AlbumIdsSelected, CurrentReviews, AlbumIdsSelectedRanking } from "../lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking } from "../lib/definitions";
 import { useRef, useEffect, useState } from "react";
 import AlbumElement from "./Album";
 import useSWR from "swr";
