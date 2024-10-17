@@ -1,24 +1,24 @@
 'use client'
 import styles from "./albumsList.module.css";
-import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip } from "@bbollen23/brutal-paper";
+import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown } from "@bbollen23/brutal-paper";
 import { type DataStore } from '../../stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking } from "../lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "../lib/definitions";
 import { useRef, useEffect, useState } from "react";
 import AlbumElement from "./Album";
 import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
 
 
-
-
 const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings: AlbumIdsSelectedRanking): number[] => {
     const uniqueIdSet = new Set<number>(); // Use a set to keep track of unique album IDs
 
     // Iterate over each year in albumsSelected
-    Object.entries(albumsSelected).forEach(([year, pubIdAlbums]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(albumsSelected).forEach(([_year, pubIdAlbums]) => {
         // Iterate over each pub id
-        Object.entries(pubIdAlbums).forEach(([pubId, binnedAlbums]) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        Object.entries(pubIdAlbums).forEach(([_pubId, binnedAlbums]) => {
             // Get values of each bin (which is list of albumIds)
             Object.values(binnedAlbums).forEach((albumIds) => {
                 // ids is an array of numbers (album IDs)
@@ -29,8 +29,10 @@ const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings:
         });
     });
 
-    Object.entries(albumsSelectedRankings).forEach(([year, pubIdAlbums]) => {
-        Object.entries(pubIdAlbums).forEach(([pubId, albumIds]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(albumsSelectedRankings).forEach(([_year, pubIdAlbums]) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        Object.entries(pubIdAlbums).forEach(([_pubId, albumIds]) => {
             albumIds.forEach((albumId => {
                 uniqueIdSet.add(albumId);
             }))
@@ -52,12 +54,12 @@ const AlbumList = () => {
 
 
     const flatAlbumIds = getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings);
-    const { data, isLoading, error } = useSWR(
-        flatAlbumIds.length > 0 ? `/api/albums?album_ids=${flatAlbumIds}` : null,
+    const { data, isLoading } = useSWR(
+        `/api/albums?album_ids=${flatAlbumIds}`,
         fetcher)
 
     const getReviews = (album: Album): Review[] => {
-        let reviewsArray: Review[] = []; // Initialize an array to hold reviews for the specified album
+        const reviewsArray: Review[] = []; // Initialize an array to hold reviews for the specified album
 
         // Iterate through each year in the reviews object
         Object.values(reviews).forEach(pubIdByYear => {
@@ -76,7 +78,7 @@ const AlbumList = () => {
     };
 
     const getRankings = (album: Album): Ranking[] => {
-        let rankingsArray: Ranking[] = [];
+        const rankingsArray: Ranking[] = [];
 
         Object.values(rankings).forEach(pubIdByYear => {
             // Iterate through each publication ID's reviews
@@ -96,7 +98,55 @@ const AlbumList = () => {
     const [searchTermAlbum, setSearchTermAlbum] = useState<string>('');
     const previousAlbumListRef = useRef<Album[]>([]); // or whatever type albumList is
     const [totalAlbums, setTotalAlbums] = useState<Album[]>([]);
-    const albumList: Album[] = totalAlbums.filter((entry: Album) => entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) || entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase()))
+
+    const [sortBy, setSortBy] = useState<string | null>(null)
+    // const albumList: Album[] = totalAlbums.filter((entry: Album) => entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) || entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase()))
+
+    const albumList: AlbumWithScore[] = totalAlbums
+        .filter((entry: Album) =>
+            entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) ||
+            entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase())
+        )
+        .map(album => {
+            // Calculate average score
+            const reviews = getReviews(album)
+
+            const albumWithScore = {
+                ...album,
+                avgScore: 0,
+                reviews
+            }
+            let avgScore = 0;
+            if (albumWithScore.reviews && albumWithScore.reviews.length > 0) {
+                const totalScore = albumWithScore.reviews.reduce((sum, review) => sum + parseFloat(review.score.toString()), 0);
+                avgScore = Math.round((totalScore / albumWithScore.reviews.length)) / 10; // Set average score
+            }
+            return {
+                ...albumWithScore,
+                avg_score: avgScore
+            } as AlbumWithScore;
+        });
+
+    const handleOnSortByChange = (entry: string) => {
+        setSortBy(entry);
+    }
+
+    // Sort the filtered album list
+    const sortedAlbumList: AlbumWithScore[] = albumList.sort((a, b) => {
+        if (sortBy === 'Title') {
+            return a.album_title.localeCompare(b.album_title); // Sort alphabetically by title
+        } else if (sortBy === 'Avg. Score') {
+            return (b.avg_score || 0) - (a.avg_score || 0); // Sort by average score descending
+        } else if (sortBy === 'Release Date') {
+            return new Date(b.release_date).getTime() - new Date(a.release_date).getTime(); // Sort by release date descending
+        } else if (sortBy === 'Artist') {
+            return a.artists.join(",").localeCompare(b.artists.join(",")); // Sort by artist names
+        }
+        // Add other sorting options here as needed (e.g., Release Date, Avg. Score, Artist)
+        return 0; // Default case
+    });
+
+
 
     // Can use unique list instead of list of albums. Will be easier.
     useEffect(() => {
@@ -146,10 +196,21 @@ const AlbumList = () => {
             <div className={styles.albumSelectorArea}>
                 <Input label="Search" placeholder="Search Albums" value={searchTermAlbum} onChange={handleSearchTermAlbumChange} />
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {data && data.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <div></div>}
+                    {data && data.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <b>Showing 0/0 Albums</b>}
                     <div style={{ display: 'flex' }}>
-                        <Tooltip size="sm" content='Clear albums'><Icon icon='bi bi-trash' size='sm' /></Tooltip>
-                        <Tooltip size="sm" content='Download as CSV'><Icon icon='bi bi-download' size='sm' /></Tooltip>
+                        <Tooltip size="sm" content='Sort By'>
+                            <IconDropdown
+                                dropDownList={['Avg. Score', 'Release Date', 'Title', 'Artist']} size="sm"
+                                icon='bi bi-funnel'
+                                onChange={handleOnSortByChange}
+                            />
+                        </Tooltip>
+                        <Tooltip size="sm" content='Clear albums'>
+                            <Icon icon='bi bi-trash' size='sm' />
+                        </Tooltip>
+                        <Tooltip size="sm" content='Download as CSV'>
+                            <Icon icon='bi bi-download' size='sm' />
+                        </Tooltip>
                     </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', }}>
@@ -160,12 +221,12 @@ const AlbumList = () => {
             <Scrollable width='100%' height='calc(100vh - 320px)'>
                 {isLoading ?
                     <div className={styles.loadingAlbumsContainer}>
-                        <div style={{ fontSize: '1.2rem;' }}>Loading</div><LoadingIcon visible={true} />
+                        <div style={{ fontSize: '1.2rem' }}>Loading</div><LoadingIcon visible={true} />
                     </div>
-                    : albumList.map((album: Album) => {
+                    : sortedAlbumList.map((album: AlbumWithScore) => {
                         return (
                             // <div></div>
-                            <AlbumElement key={album.id} album={album} reviews={getReviews(album)} rankings={getRankings(album)} />
+                            <AlbumElement avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={getRankings(album)} />
                         )
                     })
                 }

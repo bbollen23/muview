@@ -60,18 +60,13 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     // Grab theme
     const { theme } = useTheme();
 
-
-
-
     // Get store variables
-    // const setLoadingAlbums = useDataStore((state) => state.setLoadingAlbums);
-    // const addAlbums = useDataStore((state) => state.addAlbums);
-    // const removeAlbums = useDataStore((state) => state.removeAlbums);
-    // const albumsSelected = useDataStore((state) => state.albumsSelected);
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state => state.chartColorScheme));
     const addReviews = useDataStore((state => state.addReviews))
-    const clickBarSelection = useDataStore((state) => state.clickBarSelection)
+    const clickBarSelection = useDataStore((state) => state.clickBarSelection);
+    const selectedAlbumIds = useDataStore((state) => state.selectedAlbumIds);
+
     // const reviews = useDataStore((state) => state.reviews);
 
     const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
@@ -79,48 +74,34 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     // Generate state for tracking marks for clicked bars
     const [clickedData, setClickedData] = useState<BarData[]>([]);
 
-    // const reviewData = reviews[publication_id]
-
     const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&year=${year}`, fetcher)
 
 
-
     // Generate step size for particular publication
-    // const stepSize = Math.max(smallestScoreDifference(reviewData), 5);
-    const stepSize = 5;
-
-    const handleClickData = (name: string, value: any) => {
-        console.log('Im here')
-        clickBarSelection(value.bin0, value.bin1, publication_id, year);
+    let stepSize = 5;
+    if (data) {
+        stepSize = Math.max(smallestScoreDifference(data.newReviews), 5);
     }
-    // Handle adding or removing albums
-    // const handleClickData = async (name: string, value: any) => {
-    //     setLoadingAlbums(true);
 
-    //     if (!(clickedData.some(entry => entry.bin0 === value.bin0))) {
-    //         setClickedData((prev: BarData[]) => [
-    //             ...prev,
-    //             { bin0: value.bin0, bin1: value.bin1, count: value.count }
-    //         ]);
-    //         // Fetch albums
-    //         const album_ids = reviewData.filter((review: Review) => review.score >= value.bin0 && review.score < value.bin1).map((entry: Review) => entry.album_id).join(',');
-    //         const response = await fetch(`/api/albums?album_ids=${album_ids}`);
-    //         if (!response.ok) {
-    //             console.error('Error fetching album data');
-    //             return
-    //         }
-    //         const data = await response.json();
-    //         addAlbums(data.albums, value.bin0, value.bin1, publication_id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleClickData = (name: string, value: any) => {
 
-    //     } else {
-    //         setClickedData((prev: BarData[]) => {
-    //             return prev.filter(entry => entry.bin0 !== value.bin0)
-    //         })
-    //         removeAlbums(value.bin0, value.bin1, publication_id)
-    //     }
-    //     setLoadingAlbums(false);
-    // };
+        setClickedData((prev: BarData[]) => {
+            let updatedState = [...prev];
 
+            if (selectedAlbumIds[year] && selectedAlbumIds[year][publication_id] && selectedAlbumIds[year][publication_id][`${value.bin0},${value.bin1}`]) {
+                updatedState = prev.filter((entry: BarData) => entry.bin0 !== value.bin0)
+            } else if (!updatedState.some(entry => entry.bin0 === value.bin0 && entry.bin1 === value.bin1)) {
+                updatedState.push({ 'bin0': value.bin0, 'bin1': value.bin1, 'count': value.count })
+            }
+
+            clickBarSelection(value.bin0, value.bin1, publication_id, year);
+
+            return updatedState;
+        })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     const handleHoverData = (name: any, value: any) => {
         // Placeholder for possible new stuff
     };
@@ -130,24 +111,25 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     };
 
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     // Handle initializing clicked bar marks when navigating back to page
-    //     if (!(publication_id in albumsSelected)) {
-    //         return
-    //     }
-    //     let barsSelected: BarData[] = [];
-    //     Object.keys(albumsSelected[publication_id]).forEach((bin) => {
-    //         const bins = bin.split(',').map(Number)
-    //         barsSelected.push({
-    //             "bin0": bins[0],
-    //             "bin1": bins[1],
-    //             "count": albumsSelected[publication_id][bin].length
-    //         })
-    //     })
-    //     setClickedData(barsSelected);
+        // Handle initializing clicked bar marks when navigating back to page
+        if (!(year in selectedAlbumIds) || !(publication_id in selectedAlbumIds[year])) {
+            return
+        }
+        const barsSelected: BarData[] = [];
+        Object.keys(selectedAlbumIds[year][publication_id]).forEach((bin) => {
+            const bins = bin.split(',').map(Number)
+            barsSelected.push({
+                "bin0": bins[0],
+                "bin1": bins[1],
+                "count": selectedAlbumIds[year][publication_id][bin].length
+            })
+        })
 
-    // }, [])
+        setClickedData(barsSelected)
+
+    }, [])
 
     useEffect(() => {
         if (data) {
@@ -273,12 +255,13 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
                     "from": { "data": "clickedData" },
                     "encode": {
                         "update": {
-                            "x": { "scale": "xscale", "field": "bin0" }, // Adjusted for correct property
+                            "x": { "scale": "xscale", "field": "bin0" },
                             "x2": { "scale": "xscale", "field": "bin1" },
-                            "y": { "scale": "yscale", "field": "count" }, // Adjusted for correct property
-                            "y2": { "scale": "yscale", "field": "count" },
-                            "stroke": { "value": "orange" },
-                            "strokeWidth": { "value": 4 }
+                            "y": { "scale": "yscale", "field": "count" },
+                            "y2": { "scale": "yscale", "value": 0 },
+                            "stroke": { "value": "#0C0A09" },
+                            "strokeWidth": { "value": 2 },
+                            "fill": { "value": "orange" }
                         }
                     }
                 }
@@ -305,7 +288,7 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     }
     if (isLoading) return (
         <div style={{ width: '450px', height: '275px', display: 'flex', flex: 1, justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '80px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '80px', fontSize: '1.2rem' }}>
                 Loading<LoadingIcon visible={true} />
             </div>
         </div>)

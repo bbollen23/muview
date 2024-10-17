@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla'
-import type { AlbumsSelected, Publication, Review, Album, Ranking, AlbumsSelectedRankings, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking } from '@/app/lib/definitions';
+import type { Publication, Review, Ranking, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking } from '@/app/lib/definitions';
 
 
 export type DataStoreState = {
@@ -22,13 +22,11 @@ export type DataStoreState = {
 export type DataStoreActions = {
     addPublication: (publication: Publication) => void;
     removePublication: (publication: Publication) => void;
-    addYear: (year: string) => void;
-    removeYear: (year: string) => void;
     clickBarSelection: (bin0: number, bin1: number, publication_id: number, year: number) => void;
     brushSelection: (x1: number, x2: number, y1: number, y2: number, year: number, publication_id: number) => void;
     addReviews: (reviews: Review[], year: number) => void;
     addRankings: (rankings: Ranking[], year: number) => void;
-
+    setSelectedYears: (year: string[]) => void;
 
 
     // Currently Unused
@@ -63,7 +61,7 @@ export const initDataStore = (): DataStoreState => {
         rankings: {},
         loading: false,
         selectedYear: '2024',
-        selectedYears: [2024, 2023],
+        selectedYears: [2024],
         chartColorScheme: [
             "#2563EB", //blue 600
             "#65A30D", // lime 600
@@ -169,7 +167,7 @@ export const createDataStore = (
             })
         },
         setLoading: (loading: boolean) => {
-            set((state) => ({
+            set(() => ({
                 loading
             }))
         },
@@ -188,44 +186,46 @@ export const createDataStore = (
         // },
 
         setSelectedYear: (year: string) => {
-            set((state) => ({
+            set(() => ({
                 selectedYear: year
             }))
         },
-        addYear: (year: string) => {
-            set((state) => ({
-                selectedYears: [...state.selectedYears, parseInt(year)]
-            }))
-        },
-        removeYear: (year: string) => {
-            set((state) => ({
-                selectedYears: state.selectedYears.filter((entry: number) => entry !== parseInt(year))
+        setSelectedYears: (years: string[]) => {
+            set(() => ({
+                selectedYears: years.map(Number)
             }))
         },
         clickBarSelection: (bin0: number, bin1: number, publication_id: number, year: number) => {
             set((state) => {
-                let updatedAlbumIds: AlbumIdsSelected = { ...state.selectedAlbumIds };
 
+                const updatedAlbumIds: AlbumIdsSelected = { ...state.selectedAlbumIds };
 
-                // What happens if no year, pubId? Not possible don't think. Always there
-                const tempAlbumIds = [...state.reviews[year][publication_id]].filter((review: Review) => review.score >= bin0 && review.score <= bin1).map((entry: Review) => entry.album_id)
+                if (updatedAlbumIds[year] && updatedAlbumIds[year][publication_id] && updatedAlbumIds[year][publication_id][`${bin0},${bin1}`]) {
+                    delete updatedAlbumIds[year][publication_id][`${bin0},${bin1}`]
+                } else {
+                    // What happens if no year, pubId? Not possible don't think. Always there
+                    const tempAlbumIds = [...state.reviews[year][publication_id]].filter((review: Review) => review.score >= bin0 && review.score < bin1).map((entry: Review) => entry.album_id)
 
-                // Initialize records if none exist
-                if (!updatedAlbumIds[year]) {
-                    updatedAlbumIds[year] = { [publication_id]: {} }
-                } else if (!updatedAlbumIds[year][publication_id]) {
-                    updatedAlbumIds[year][publication_id] = {}
+                    // Initialize records if none exist
+                    if (!updatedAlbumIds[year]) {
+                        updatedAlbumIds[year] = { [publication_id]: {} }
+                    } else if (!updatedAlbumIds[year][publication_id]) {
+                        updatedAlbumIds[year][publication_id] = {}
+                    }
+
+                    updatedAlbumIds[year][publication_id][`${bin0},${bin1}`] = tempAlbumIds;
                 }
 
-                updatedAlbumIds[year][publication_id][`${bin0},${bin1}`] = tempAlbumIds;
                 return {
                     selectedAlbumIds: updatedAlbumIds
                 }
+
+
             })
         },
         brushSelection: (x1: number, x2: number, y1: number, y2: number, year: number, publication_id: number) => {
             set((state) => {
-                let updatedAlbumIds: AlbumIdsSelectedRanking = { ...state.selectedAlbumIdsRankings }
+                const updatedAlbumIds: AlbumIdsSelectedRanking = { ...state.selectedAlbumIdsRankings }
 
 
                 const tempAlbumIds = [...state.rankings[year][publication_id]].filter((ranking: Ranking) => ranking.rank >= Math.min(x1, x2) && ranking.rank <= Math.max(x1, x2) && ranking.score >= Math.min(y1, y2) && ranking.score <= Math.max(y1, y2)).map((entry: Ranking) => entry.album_id);

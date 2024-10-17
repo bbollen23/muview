@@ -16,10 +16,8 @@ import {
     Drawer,
     DrawerHeader,
     DrawerItem,
-    Scrollable,
     LoadingOverlay,
-    Input,
-    Select
+    SwitchGroup,
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';
@@ -34,17 +32,19 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
     const pageName = name.charAt(0).toUpperCase() + name.slice(1)
 
     const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
-
+    const [yearClickState, setYearClickState] = useState<boolean[]>([true, false, false, false, false]);
     const toggleDrawer = () => {
         setDrawerOpened((prev) => !prev);
     }
 
     const loading = useDataStore((state: DataStore) => state.loading);
-    const setSelectedYear = useDataStore((state: DataStore) => state.setSelectedYear);
+    const setSelectedYears = useDataStore((state: DataStore) => state.setSelectedYears)
 
-    const handleSelectYear = (year: string) => {
-        console.log('selecting year')
-        setSelectedYear(year);
+    const yearsList: string[] = ['2024', '2023', '2022', '2021', '2020'];
+
+    const handleSelectYear = (switchGroupState: boolean[]) => {
+        const tempYearList = yearsList.filter((entry: string, index: number) => switchGroupState[index]);
+        setSelectedYears(tempYearList);
     }
 
     return (
@@ -65,8 +65,19 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <div className={pageName === 'Publications' ? styles.dashboardContainerFull : styles.dashboardContainer}>
                     <div className={styles.pageContainer}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h1 style={{ marginTop: 0 }}>{pageName}</h1>
-                            {pageName !== 'Publications' ? <div><Select defaultIndex={0} label='Year' onSelect={(year) => handleSelectYear(year)} selectList={['2024', '2023', '2022', '2021', '2020']} /></div> : null}
+                            <h1 style={{ marginTop: 0 }}>
+                                {pageName}
+                            </h1>
+                            {pageName !== 'Publications' ?
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                                    <div>Review Years</div>
+                                    <SwitchGroup
+                                        labelList={yearsList}
+                                        clickState={yearClickState}
+                                        setClickState={setYearClickState}
+                                        onChange={handleSelectYear}
+                                    />
+                                </div> : null}
                         </div>
                         {children}
                     </div>
@@ -83,8 +94,8 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <DrawerHeader title="MuView" closeButton />
                 <DrawerItem icon="bi bi-bar-chart-line-fill" label="Dashboard" onClick={() => { router.push("/dashboard"); toggleDrawer(); }} />
                 <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { router.push("/dashboard/publications"); toggleDrawer(); }} />
-                <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" />
-                <DrawerItem icon="bi bi-database-add" label="Selections" />
+                {/* <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" />
+                <DrawerItem icon="bi bi-database-add" label="Selections" /> */}
             </Drawer>
         </Layout>
     )

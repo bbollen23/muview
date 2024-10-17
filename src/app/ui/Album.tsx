@@ -15,23 +15,24 @@ interface Position {
 interface AlbumElementProps {
     album: Album,
     reviews: Review[],
-    rankings: Ranking[]
+    rankings: Ranking[],
+    avgScore: number
 }
 
 
-const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Element => {
+const AlbumElement = ({ avgScore, album, reviews, rankings }: AlbumElementProps): JSX.Element => {
     const { theme } = useTheme();
     const [visible, setVisible] = useState(false);
     const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
     const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state: DataStore) => state.chartColorScheme)
 
-    let avg = 0;
-    reviews.forEach((review: Review) => {
-        avg = avg + parseFloat(review.score.toString());
-    })
+    // let avg = 0;
+    // reviews.forEach((review: Review) => {
+    //     avg = avg + parseFloat(review.score.toString());
+    // })
 
-    avg = Math.round((avg / reviews.length)) / 10;
+    // avg = Math.round((avg / reviews.length)) / 10;
 
     const handleMouseOver = (event: React.MouseEvent<HTMLDivElement>) => {
         const targetElement = event.currentTarget;
@@ -40,7 +41,7 @@ const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Elem
         const viewportHeight = window.innerHeight;
 
 
-        let positionLeft = targetRect.left - 520;
+        const positionLeft = targetRect.left - 520;
         let positionTop = targetRect.top - 120;
         if (positionTop + 300 > viewportHeight) {
             positionTop = viewportHeight - 330;
@@ -91,7 +92,7 @@ const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Elem
                         </div>
                         <div className={styles.reviewSection}>
                             {reviews.map((review: Review) => (
-                                <div className={styles.review}>
+                                <div key={`${review.id}`} className={styles.review}>
                                     <div className={styles.publicationName}>
                                         {<div>{publicationsSelected.filter((publication: Publication) => review.publication_id === publication.id)[0].name}</div>}
                                     </div>
@@ -127,7 +128,7 @@ const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Elem
                 </div>
                 <div className={styles.right}>
                     <div className={styles.review}>
-                        <div style={{ marginTop: 0, fontSize: '0.9rem', marginRight: '5px' }} className={styles.score}>{avg}</div>
+                        <div style={{ marginTop: 0, fontSize: '0.9rem', marginRight: '5px' }} className={styles.score}>{avgScore}</div>
                     </div>
                 </div>
             </div>

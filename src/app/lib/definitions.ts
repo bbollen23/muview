@@ -39,8 +39,12 @@ export interface Album {
     apple_music_url?: string,
     bandcamp_url?: string,
     soundcloud_url?: string,
-    youtube_url: string,
-    reviews?: Review[]
+    youtube_url: string
+}
+
+export interface AlbumWithScore extends Album {
+    avg_score: number;
+    reviews: Review[];
 }
 
 export interface Review {

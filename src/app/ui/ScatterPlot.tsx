@@ -45,7 +45,7 @@ const ScatterPlot = ({ publication_id, year }: ScatterPlotProps): JSX.Element =>
         }
     }, [data])
 
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleBrushData = (name: string, value: any) => {
         console.log(value);
         const { x1, x2, y1, y2 } = value as BrushSelectionData;

@@ -1,5 +1,5 @@
-import { sql, db, createClient } from '@vercel/postgres';
-import type { Review, Publication, Album } from './definitions';
+import { sql, createClient } from '@vercel/postgres';
+import type { Publication } from './definitions';
 
 export async function fetchPublications() {
     try {
