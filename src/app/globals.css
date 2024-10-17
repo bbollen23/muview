@@ -10,32 +10,3 @@ a {
     text-decoration: none;
     color: inherit;
 }
-
-
-/* .bp-layout.no-right-margin.no-left-margin {
-    grid-template-columns: 20px var(--layout-margin) 1fr var(--layout-margin) 20px;
-
-}
-
-.bp-layout.no-right-margin.no-left-margin .bp-body {
-    grid-column: 2 / -2;
-
-}
-
-.bp-layout.no-right-margin.no-left-margin .bp-header {
-    grid-template-columns: 20px 250px 1fr 200px 20px;
-}
-
-.bp-layout.no-right-margin.no-left-margin .bp-header .bp-header-group.left {
-    grid-column: 3;
-}
-
-.bp-layout.no-right-margin.no-left-margin .bp-header .bp-header-group.right {
-    grid-column: 4;
-} */
-
-/* 
-.dark-mode .bp-tooltip {
-    background-color: hsl(var(--zinc-400)) !important;
-    color: hsl(var(--gray-900)) !important;
-} */

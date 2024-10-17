@@ -18,7 +18,8 @@ import {
     DrawerItem,
     Scrollable,
     LoadingOverlay,
-    Input
+    Input,
+    Select
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';
@@ -38,8 +39,13 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
         setDrawerOpened((prev) => !prev);
     }
 
-    const loading = useDataStore((state: DataStore) => state.loading)
+    const loading = useDataStore((state: DataStore) => state.loading);
+    const setSelectedYear = useDataStore((state: DataStore) => state.setSelectedYear);
 
+    const handleSelectYear = (year: string) => {
+        console.log('selecting year')
+        setSelectedYear(year);
+    }
 
     return (
         <Layout className='no-right-margin no-left-margin no-footer'>
@@ -60,7 +66,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                     <div className={styles.pageContainer}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h1 style={{ marginTop: 0 }}>{pageName}</h1>
-                            {pageName !== 'publications' ? <div>Viewing reviews for 2023</div> : null}
+                            {pageName !== 'Publications' ? <div><Select defaultIndex={0} label='Year' onSelect={(year) => handleSelectYear(year)} selectList={['2024', '2023', '2022', '2021', '2020']} /></div> : null}
                         </div>
                         {children}
                     </div>

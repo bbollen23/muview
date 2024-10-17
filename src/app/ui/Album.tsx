@@ -4,6 +4,8 @@ import styles from "./albumsList.module.css";
 import type { Album, Review, Publication, Ranking } from '../lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import { type DataStore } from '../../stores/data-store'
+import clsx from 'clsx';
+import { useTheme } from '@/providers/theme-provider';
 
 interface Position {
     left: number;
@@ -18,6 +20,7 @@ interface AlbumElementProps {
 
 
 const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Element => {
+    const { theme } = useTheme();
     const [visible, setVisible] = useState(false);
     const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
     const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected);
@@ -59,7 +62,7 @@ const AlbumElement = ({ album, reviews, rankings }: AlbumElementProps): JSX.Elem
             {visible &&
                 ReactDom.createPortal(
                     <div
-                        className={styles.albumToolTip}
+                        className={theme === 'dark' ? clsx(styles.albumToolTip, styles.albumToolTipDark) : styles.albumToolTip}
                         style={{ top: `${position.top}px`, left: `${position.left}px` }}
                     >
                         <div style={{ display: 'flex', flexDirection: 'row', gap: '40px', justifyContent: 'space-between' }}>

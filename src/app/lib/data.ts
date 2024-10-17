@@ -15,7 +15,7 @@ export async function fetchPublications() {
     }
 }
 
-export async function fetchReviews(publication_ids: number[]) {
+export async function fetchReviews(publication_ids: number[], year: string) {
     const publication_ids_string = publication_ids.join(',');
     const client = createClient();
     await client.connect();
@@ -23,7 +23,9 @@ export async function fetchReviews(publication_ids: number[]) {
         const data = await client.query(`
             SELECT *
             FROM reviews
-            WHERE publication_id IN (${publication_ids_string}) AND year = 2023`);
+            WHERE publication_id IN (${publication_ids_string}) AND year = ${year}`);
+        console.log('I am here as well')
+        console.log(data.rows.length);
         const reviews = data.rows;
         return reviews;
     } catch (error) {
@@ -34,7 +36,7 @@ export async function fetchReviews(publication_ids: number[]) {
     }
 }
 
-export async function fetchRankings(publication_ids: number[]) {
+export async function fetchRankings(publication_ids: number[], year: string) {
     const publication_ids_string = publication_ids.join(',');
     const client = createClient();
     await client.connect();
@@ -44,7 +46,7 @@ export async function fetchRankings(publication_ids: number[]) {
         FROM rankings as t1
         LEFT JOIN reviews as t2
         ON t1.album_id = t2.album_id AND t1.publication_id = t2.publication_id
-        WHERE t1.publication_id IN (${publication_ids_string}) AND t1.year = 2023`);
+        WHERE t1.publication_id IN (${publication_ids_string}) AND t1.year = ${year}`);
         const rankings = data.rows;
         return rankings;
     } catch (error) {

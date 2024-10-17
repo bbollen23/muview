@@ -1,33 +1,44 @@
 import { createStore } from 'zustand/vanilla'
-import type { AlbumsSelected, Publication, Review, Album, Ranking, AlbumsSelectedRankings } from '@/app/lib/definitions';
+import type { AlbumsSelected, Publication, Review, Album, Ranking, AlbumsSelectedRankings, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking } from '@/app/lib/definitions';
 
 
 export type DataStoreState = {
     year: number;
     publicationsSelected: Publication[];
-    reviews: Record<number, Review[]>;
     albums: Album[];
     albumsSelected: AlbumsSelected;
     loading: boolean;
     loadingAlbums: boolean;
     chartColorScheme: string[];
-    rankings: Record<number, Ranking[]>;
     albumsSelectedRankings: AlbumsSelectedRankings;
+    selectedYear: string;
+    selectedYears: number[];
+
+    // New stuff
+    reviews: CurrentReviews;
+    rankings: CurrentRankings;
+    selectedAlbumIds: AlbumIdsSelected;
+    selectedAlbumIdsRankings: AlbumIdsSelectedRanking;
 }
 
 
 export type DataStoreActions = {
     addPublication: (publication: Publication) => void;
     removePublication: (publication: Publication) => void;
-    addReviews: (reviews: Review[]) => void;
-    removeReviews: (pub_id: number) => void;
+    addReviews: (reviews: Review[], year: number) => void;
+    removeReviews: (publication_id: number, year: number) => void;
     setLoading: (loading: boolean) => void;
     addAlbums: (newAlbums: Album[], bin0: number, bin1: number, publication_id: number) => void;
     removeAlbums: (bin0: number, bin1: number, publication_id: number) => void;
     setLoadingAlbums: (loadingAlbums: boolean) => void;
-    addRankings: (rankings: Ranking[]) => void;
-    removeRankings: (publication_id: number) => void;
+    addRankings: (rankings: Ranking[], year: number) => void;
+    removeRankings: (publication_id: number, year: number) => void;
     addAlbumsRankings: (newAlbums: Album[], publication_id: number) => void;
+    setSelectedYear: (year: string) => void;
+    addYear: (year: string) => void;
+    removeYear: (year: string) => void;
+    clickBarSelection: (bin0: number, bin1: number, publication_id: number, year: number) => void;
+    brushSelection: (x1: number, x2: number, y1: number, y2: number, year: number, publication_id: number) => void;
 }
 
 
@@ -45,7 +56,11 @@ export const defaultInitialState: DataStoreState = {
     albumsSelectedRankings: {},
     loading: false,
     loadingAlbums: false,
-    chartColorScheme: []
+    chartColorScheme: [],
+    selectedYear: '',
+    selectedYears: [],
+    selectedAlbumIds: {},
+    selectedAlbumIdsRankings: {}
 }
 
 export const initDataStore = (): DataStoreState => {
@@ -59,6 +74,8 @@ export const initDataStore = (): DataStoreState => {
         albumsSelectedRankings: {},
         loading: false,
         loadingAlbums: false,
+        selectedYear: '2024',
+        selectedYears: [2024, 2023],
         chartColorScheme: [
             "#2563EB", //blue 600
             "#65A30D", // lime 600
@@ -66,7 +83,9 @@ export const initDataStore = (): DataStoreState => {
             "#0D9488", // teal 600
             "#0EA5E9", // sky 500
             "#E11D48", // rose 600
-        ]
+        ],
+        selectedAlbumIds: {},
+        selectedAlbumIdsRankings: {}
     }
 }
 
@@ -98,28 +117,53 @@ export const createDataStore = (
                 }
             });
         },
-        addReviews: (newReviews: Review[]) => {
+        addReviews: (newReviews: Review[], year: number) => {
             set((state) => {
+                // Get publication_id
+                const publication_id = newReviews[0].publication_id;
                 const updatedReviews = { ...state.reviews }
-                newReviews.forEach((review: Review) => {
-                    const pubId = review.publication_id;
 
-                    if (!(pubId in updatedReviews)) {
-                        updatedReviews[pubId] = [];
-                    }
+                if (!updatedReviews[year]) {
+                    updatedReviews[year] = {};
+                }
 
-                    updatedReviews[pubId].push(review);
-                })
+                updatedReviews[year][publication_id] = newReviews;
                 return {
                     reviews: updatedReviews
                 }
             })
         },
-        removeReviews: (pubId: number) => {
+        removeReviews: (publication_id: number, year: number) => {
             set((state) => {
                 const updatedReviews = { ...state.reviews };
-                delete updatedReviews[pubId];
+                delete updatedReviews[year][publication_id];
                 return { reviews: updatedReviews }
+            })
+        },
+        addRankings: (newRankings: Ranking[], year: number) => {
+            set((state) => {
+                const updatedRankings = { ...state.rankings }
+                if (newRankings.length > 0) {
+                    // Get publication_id
+                    const publication_id = newRankings[0].publication_id;
+
+
+                    if (!updatedRankings[year]) {
+                        updatedRankings[year] = {};
+                    }
+
+                    updatedRankings[year][publication_id] = newRankings;
+                }
+                return {
+                    rankings: updatedRankings
+                }
+            })
+        },
+        removeRankings: (publication_id: number, year: number) => {
+            set((state) => {
+                const updatedRankings = { ...state.rankings };
+                delete updatedRankings[year][publication_id];
+                return { rankings: updatedRankings }
             })
         },
         setLoading: (loading: boolean) => {
@@ -139,6 +183,7 @@ export const createDataStore = (
                 }
             })
         },
+
         removeAlbums: (bin0: number, bin1: number, publication_id: number) => {
             set((state) => {
                 const updatedAlbums = { ...state.albumsSelected };
@@ -151,40 +196,67 @@ export const createDataStore = (
                 loadingAlbums
             }))
         },
-        addRankings: (rankings: Ranking[]) => {
-            set((state) => {
-                const updatedRankings = { ...state.rankings }
-                rankings.forEach((ranking: Ranking) => {
-                    const pubId = ranking.publication_id;
 
-                    if (!(pubId in updatedRankings)) {
-                        updatedRankings[pubId] = [];
-                    }
-
-                    updatedRankings[pubId].push(ranking);
-                })
-                return {
-                    rankings: updatedRankings
-                }
-            })
-        },
-        removeRankings: (publication_id: number) => {
-            set((state) => {
-                const rankings = { ...state.rankings }
-                if (publication_id in rankings) {
-                    delete rankings[publication_id];
-                }
-                return {
-                    rankings
-                }
-            })
-        },
         addAlbumsRankings: (newAlbums: Album[], publication_id: number) => {
             set((state) => {
                 const updatedAlbums = { ...state.albumsSelectedRankings };
                 updatedAlbums[publication_id] = newAlbums;
                 return {
                     albumsSelectedRankings: updatedAlbums
+                }
+            })
+        },
+        setSelectedYear: (year: string) => {
+            set((state) => ({
+                selectedYear: year
+            }))
+        },
+        addYear: (year: string) => {
+            set((state) => ({
+                selectedYears: [...state.selectedYears, parseInt(year)]
+            }))
+        },
+        removeYear: (year: string) => {
+            set((state) => ({
+                selectedYears: state.selectedYears.filter((entry: number) => entry !== parseInt(year))
+            }))
+        },
+        clickBarSelection: (bin0: number, bin1: number, publication_id: number, year: number) => {
+            set((state) => {
+                let updatedAlbumIds: AlbumIdsSelected = { ...state.selectedAlbumIds };
+
+
+                // What happens if no year, pubId? Not possible don't think. Always there
+                const tempAlbumIds = [...state.reviews[year][publication_id]].filter((review: Review) => review.score >= bin0 && review.score <= bin1).map((entry: Review) => entry.album_id)
+
+                // Initialize records if none exist
+                if (!updatedAlbumIds[year]) {
+                    updatedAlbumIds[year] = { [publication_id]: {} }
+                } else if (!updatedAlbumIds[year][publication_id]) {
+                    updatedAlbumIds[year][publication_id] = {}
+                }
+
+                updatedAlbumIds[year][publication_id][`${bin0},${bin1}`] = tempAlbumIds;
+                return {
+                    selectedAlbumIds: updatedAlbumIds
+                }
+            })
+        },
+        brushSelection: (x1: number, x2: number, y1: number, y2: number, year: number, publication_id: number) => {
+            set((state) => {
+                let updatedAlbumIds: AlbumIdsSelectedRanking = { ...state.selectedAlbumIdsRankings }
+
+
+                const tempAlbumIds = [...state.rankings[year][publication_id]].filter((ranking: Ranking) => ranking.rank >= Math.min(x1, x2) && ranking.rank <= Math.max(x1, x2) && ranking.score >= Math.min(y1, y2) && ranking.score <= Math.max(y1, y2)).map((entry: Ranking) => entry.album_id);
+
+                if (!updatedAlbumIds[year]) {
+                    updatedAlbumIds[year] = {};
+                }
+
+                updatedAlbumIds[year][publication_id] = tempAlbumIds;
+
+                return {
+                    selectedAlbumIdsRankings: updatedAlbumIds
                 }
             })
         }

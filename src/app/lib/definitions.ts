@@ -9,8 +9,23 @@ export interface BinnedAlbums {
     [key: string]: Album[]
 }
 
+export interface BinnedIds {
+    [key: string]: number[]
+}
+
 export type AlbumsSelected = Record<number, BinnedAlbums>;
 export type AlbumsSelectedRankings = Record<number, Album[]>;
+
+// Year, PubId, Bin, Album_ids
+export type AlbumIdsSelected = Record<number, Record<number, BinnedIds>>;
+// Year, PubId, Album_ids
+export type AlbumIdsSelectedRanking = Record<number, Record<number, number[]>>;
+
+//Year, Pub_ID, Reviews
+export type CurrentReviews = Record<number, Record<number, Review[]>>;
+export type CurrentRankings = Record<number, Record<number, Ranking[]>>;
+
+
 
 export interface Album {
     id: number,
@@ -45,3 +60,16 @@ export interface Ranking {
     year: number,
     score: number // Generated during SQL query to get original score
 }
+
+
+
+
+/**
+ * Examples
+ * 
+ * selectedAlbumIds : {2024: { 1: { '7,8' : [ bar_selected_reviews_for_pub_1_2024 ] } } }
+ * selectedAlbumIdsRankings: {2024: { 1: [ brushed_rankings_for_pub_1_2024 ] } }
+ * 
+ * 
+ * 
+ */
