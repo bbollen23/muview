@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import ReactDom from 'react-dom';
-import styles from "./albumsList.module.css";
-import type { Album, Review, Publication, Ranking } from '../lib/definitions';
+import styles from "../component.module.scss";
+import type { Album, Review, Publication, Ranking } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
-import { type DataStore } from '../../stores/data-store'
+import { type DataStore } from '@/stores/data-store'
 import clsx from 'clsx';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -12,7 +12,7 @@ interface Position {
     top: number;
 }
 
-interface AlbumElementProps {
+interface AlbumComponentProps {
     album: Album,
     reviews: Review[],
     rankings: Ranking[],
@@ -20,7 +20,7 @@ interface AlbumElementProps {
 }
 
 
-const AlbumElement = ({ avgScore, album, reviews, rankings }: AlbumElementProps): JSX.Element => {
+const AlbumComponent = ({ avgScore, album, reviews, rankings }: AlbumComponentProps): JSX.Element => {
     const { theme } = useTheme();
     const [visible, setVisible] = useState(false);
     const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
@@ -137,4 +137,4 @@ const AlbumElement = ({ avgScore, album, reviews, rankings }: AlbumElementProps)
     )
 }
 
-export default AlbumElement;
+export default AlbumComponent;

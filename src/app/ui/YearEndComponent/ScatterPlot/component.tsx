@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
-import type { Publication } from '../lib/definitions';
+import type { Publication } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import useSWR from 'swr';
 import { LoadingIcon } from '@bbollen23/brutal-paper';

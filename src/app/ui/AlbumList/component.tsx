@@ -1,11 +1,11 @@
 'use client'
-import styles from "./albumsList.module.css";
+import styles from "./component.module.scss";
 import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown } from "@bbollen23/brutal-paper";
-import { type DataStore } from '../../stores/data-store'
+import { type DataStore } from '@/stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "../lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "@/app/lib/definitions";
 import { useRef, useEffect, useState } from "react";
-import AlbumElement from "./Album";
+import AlbumComponent from "@/app/ui/AlbumList/Album";
 import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
 
@@ -226,7 +226,7 @@ const AlbumList = () => {
                     : sortedAlbumList.map((album: AlbumWithScore) => {
                         return (
                             // <div></div>
-                            <AlbumElement avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={getRankings(album)} />
+                            <AlbumComponent avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={getRankings(album)} />
                         )
                     })
                 }

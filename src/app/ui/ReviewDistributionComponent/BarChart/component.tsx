@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
-import type { Review } from '../lib/definitions';
+import type { Review } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import useSWR from 'swr';
 import { LoadingIcon } from '@bbollen23/brutal-paper';
@@ -244,9 +244,6 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
                             "fillOpacity": {
                                 "signal": "hoverData && hoverData.bin0 === datum.bin0 ? 1: 0.7"
                             },
-                            // "fill": {
-                            //     "signal": `clickData && clickData.bin0 === datum.bin0 ? 'orange' : '${chartColorSchemes[chartIndex % 6]}'`
-                            // }
                         },
                     }
                 },

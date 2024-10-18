@@ -1,0 +1,9 @@
+.pill {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border: 2px solid var(--bp-theme-border-color);
+    border-radius: 10px;
+    width: max-content;
+    background-color: #2dd4bf;
+    color: hsl(var(--gray-900));
+}

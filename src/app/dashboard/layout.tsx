@@ -22,7 +22,7 @@ import {
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';
 import type { DataStore } from '@/stores/data-store';
-import AlbumList from '@/app/ui/AlbumList';
+import { AlbumList } from '@/app/ui';
 
 
 export default function InnerLayout({ children }: { children: React.ReactNode }) {
@@ -68,7 +68,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                             <h1 style={{ marginTop: 0 }}>
                                 {pageName}
                             </h1>
-                            {pageName !== 'Publications' ?
+                            {pageName !== 'Publications' && pageName !== 'Filters' ?
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
                                     <div>Review Years</div>
                                     <SwitchGroup
@@ -94,8 +94,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <DrawerHeader title="MuView" closeButton />
                 <DrawerItem icon="bi bi-bar-chart-line-fill" label="Dashboard" onClick={() => { router.push("/dashboard"); toggleDrawer(); }} />
                 <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { router.push("/dashboard/publications"); toggleDrawer(); }} />
-                {/* <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" />
-                <DrawerItem icon="bi bi-database-add" label="Selections" /> */}
+                <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" onClick={() => { router.push("/dashboard/filters"); toggleDrawer(); }} />
             </Drawer>
         </Layout>
     )
