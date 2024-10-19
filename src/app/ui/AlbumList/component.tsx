@@ -3,11 +3,12 @@ import styles from "./component.module.scss";
 import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown } from "@bbollen23/brutal-paper";
 import { type DataStore } from '@/stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "@/app/lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore, Filter } from "@/app/lib/definitions";
 import { useRef, useEffect, useState } from "react";
 import AlbumComponent from "@/app/ui/AlbumList/Album";
 import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
+import { getAlbumIdsFromFilters } from "@/app/lib/filterAlbums";
 
 
 const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings: AlbumIdsSelectedRanking): number[] => {
@@ -48,12 +49,20 @@ const AlbumList = () => {
 
     const selectedAlbumIds = useDataStore((state: DataStore) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state: DataStore) => state.selectedAlbumIdsRankings)
+    const selectedFilters = useDataStore((state: DataStore) => state.selectedFilters);
 
     const reviews = useDataStore((state: DataStore) => state.reviews);
     const rankings = useDataStore((state: DataStore) => state.rankings);
 
 
-    const flatAlbumIds = getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings);
+    const flatAlbumIds = selectedFilters.length === 0 ? getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings) :
+        getAlbumIdsFromFilters(selectedFilters);
+    // const flatAlbumIds = getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings);
+
+    // console.log(getAlbumIdsFromFilters(selectedFilters))
+    // console.log(getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings))
+
+
     const { data, isLoading } = useSWR(
         `/api/albums?album_ids=${flatAlbumIds}`,
         fetcher)

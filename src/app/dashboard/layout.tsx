@@ -18,6 +18,7 @@ import {
     DrawerItem,
     LoadingOverlay,
     SwitchGroup,
+    Divider
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';
@@ -32,20 +33,14 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
     const pageName = name.charAt(0).toUpperCase() + name.slice(1)
 
     const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
-    const [yearClickState, setYearClickState] = useState<boolean[]>([true, false, false, false, false]);
     const toggleDrawer = () => {
         setDrawerOpened((prev) => !prev);
     }
 
     const loading = useDataStore((state: DataStore) => state.loading);
-    const setSelectedYears = useDataStore((state: DataStore) => state.setSelectedYears)
 
-    const yearsList: string[] = ['2024', '2023', '2022', '2021', '2020'];
 
-    const handleSelectYear = (switchGroupState: boolean[]) => {
-        const tempYearList = yearsList.filter((entry: string, index: number) => switchGroupState[index]);
-        setSelectedYears(tempYearList);
-    }
+
 
     return (
         <Layout className='no-right-margin no-left-margin no-footer'>
@@ -64,21 +59,11 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
             <Body>
                 <div className={pageName === 'Publications' ? styles.dashboardContainerFull : styles.dashboardContainer}>
                     <div className={styles.pageContainer}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {pageName !== 'Filters' ? <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h1 style={{ marginTop: 0 }}>
                                 {pageName}
                             </h1>
-                            {pageName !== 'Publications' && pageName !== 'Filters' ?
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                                    <div>Review Years</div>
-                                    <SwitchGroup
-                                        labelList={yearsList}
-                                        clickState={yearClickState}
-                                        setClickState={setYearClickState}
-                                        onChange={handleSelectYear}
-                                    />
-                                </div> : null}
-                        </div>
+                        </div> : null}
                         {children}
                     </div>
                     {pageName !== 'Publications' ?
@@ -92,9 +77,9 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
             </Body>
             <Drawer opened={drawerOpened} closeOnOutside onChange={setDrawerOpened} >
                 <DrawerHeader title="MuView" closeButton />
-                <DrawerItem icon="bi bi-bar-chart-line-fill" label="Dashboard" onClick={() => { router.push("/dashboard"); toggleDrawer(); }} />
-                <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { router.push("/dashboard/publications"); toggleDrawer(); }} />
-                <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" onClick={() => { router.push("/dashboard/filters"); toggleDrawer(); }} />
+                <DrawerItem icon="bi bi-bar-chart-line-fill" label="Dashboard" onClick={() => { toggleDrawer(); router.push("/dashboard") }} />
+                <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { toggleDrawer(); router.push("/dashboard/publications"); }} />
+                <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" onClick={() => { toggleDrawer(); router.push("/dashboard/filters"); }} />
             </Drawer>
         </Layout>
     )

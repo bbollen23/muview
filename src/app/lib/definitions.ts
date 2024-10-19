@@ -25,7 +25,14 @@ export type AlbumIdsSelectedRanking = Record<number, Record<number, number[]>>;
 export type CurrentReviews = Record<number, Record<number, Review[]>>;
 export type CurrentRankings = Record<number, Record<number, Ranking[]>>;
 
+export type FilterType = 'upset-filter' | 'upset-set-filter' | 'genre-filter';
 
+export interface Filter {
+    id: string,
+    groupLabels: string[],
+    albumIds: number[],
+    type?: FilterType
+}
 
 export interface Album {
     id: number,

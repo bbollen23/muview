@@ -13,13 +13,13 @@ a {
 
 
 .bp-loading-icon-container {
-    width: 60px;
-    height: 50px;
+    width: 60px !important;
+    height: 50px !important;
 }
 
 .bp-loading-icon-container .bp-loading-dots {
-    width: 40px;
-    height: 30px;
+    width: 40px !important;
+    height: 30px !important;
 }
 
 .bp-loading-icon-container .bp-loading-dots .bp-dot {
@@ -27,6 +27,16 @@ a {
     height: 8px;
 }
 
+.pill {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border: 2px solid var(--bp-theme-border-color);
+    border-radius: 10px;
+    width: max-content;
+    background-color: #2dd4bf;
+    color: hsl(var(--gray-900));
+    box-sizing: border-box;
+}
 
 
 @keyframes bounce-icon {

@@ -1,0 +1,30 @@
+.hovered {
+    border: 2px solid black;
+}
+
+.unHovered {
+    opacity: 0.6
+}
+
+.selectorRow {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.infoModalButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    z-index: 5;
+
+    &:hover .infoModalButtonText {
+        text-decoration: underline;
+    }
+}

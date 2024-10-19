@@ -1,1 +1,0 @@
-export { default as UpsetPlot } from './UpsetPlot';

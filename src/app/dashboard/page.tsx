@@ -1,6 +1,6 @@
 'use client'
 import styles from "./page.module.css";
-import { Tabs, Button } from "@bbollen23/brutal-paper";
+import { Tabs, Button, SwitchGroup, Icon, Tooltip } from "@bbollen23/brutal-paper";
 import Link from 'next/link';
 import { useDataStore } from "@/providers/data-store-provider";
 import { useState } from "react";
@@ -14,8 +14,23 @@ interface TabData {
 
 function Dashboard({ }) {
 
-  // const reviews = useDataStore((state) => state.reviews);
+  const setSelectedYears = useDataStore((state) => state.setSelectedYears)
+  const selectedYears = useDataStore((state) => state.selectedYears);
   const publicationsSelected = useDataStore((state) => state.publicationsSelected);
+  const combineYearsDashboard = useDataStore((state) => state.combineYearsDashboard);
+  const toggleCombineYears = useDataStore((state) => state.toggleCombineYears);
+
+  const yearsList: string[] = ['2024', '2023', '2022', '2021', '2020'];
+
+  const [yearClickState, setYearClickState] = useState<boolean[]>(yearsList.map((year: string) => selectedYears.includes(parseInt(year))));
+
+
+  const handleSelectYear = (switchGroupState: boolean[]) => {
+    const tempYearList = yearsList.filter((entry: string, index: number) => switchGroupState[index]);
+    setSelectedYears(tempYearList);
+  }
+
+
 
   const EmptyPublicationsComponent = () => {
     return (
@@ -29,8 +44,8 @@ function Dashboard({ }) {
   let tabsData: TabData[] = [];
   if (publicationsSelected.length > 0) {
     tabsData = [
-      { label: 'Album Distributions', 'content': <ReviewDistributionComponent /> },
-      { label: 'Year End Lists', 'content': <YearEndComponent /> }
+      { label: 'Album Distributions', 'content': <ReviewDistributionComponent combineYears={combineYearsDashboard} /> },
+      { label: 'Year End Lists', 'content': <YearEndComponent combineYears={combineYearsDashboard} /> }
     ]
   } else {
     tabsData = [
@@ -39,10 +54,40 @@ function Dashboard({ }) {
     ]
   }
 
+  const CombineYearsComponent = () => {
+    if (combineYearsDashboard) return (
+      <Tooltip size="sm" content='Separate Years'>
+        <Icon onClick={() => toggleCombineYears()} size="sm" icon='bi bi-bar-chart-line-fill' />
+      </Tooltip>
+    )
+    return (
+      <Tooltip size="sm" content='Combine Years'>
+        <Icon onClick={() => toggleCombineYears()} size="sm" icon='bi bi-bar-chart-line' />
+      </Tooltip>
+    )
+
+  }
 
   return (
-    <Tabs tabData={tabsData}>
-    </Tabs>
+    <div>
+      <div style={{ display: 'flex', margin: '20px 0px 40px 0px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div>Review Years</div>
+          <SwitchGroup
+            labelList={yearsList}
+            clickState={yearClickState}
+            setClickState={setYearClickState}
+            onChange={handleSelectYear}
+          />
+        </div>
+        <div>
+          <CombineYearsComponent />
+          <Tooltip size="sm" content="Setting"><Icon size="sm" icon='bi bi-gear' /></Tooltip>
+        </div>
+      </div>
+      <Tabs tabData={tabsData}>
+      </Tabs>
+    </div>
   );
 }
 

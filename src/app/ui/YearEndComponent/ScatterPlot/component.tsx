@@ -12,7 +12,7 @@ import { fetcher } from '@/app/lib/fetcher';
 
 interface ScatterPlotProps {
     publication_id: number,
-    year: number
+    years: number[]
 }
 
 interface BrushSelectionData {
@@ -23,14 +23,14 @@ interface BrushSelectionData {
 }
 
 
-const ScatterPlot = ({ publication_id, year }: ScatterPlotProps): JSX.Element => {
+const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element => {
 
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state => state.chartColorScheme));
     const brushSelection = useDataStore((state => state.brushSelection))
     const addRankings = useDataStore((state) => state.addRankings);
 
-    const { data, error, isLoading } = useSWR(`/api/rankings?publication_ids=${[publication_id]}&year=${year}`, fetcher)
+    const { data, error, isLoading } = useSWR(`/api/rankings?publication_ids=${[publication_id]}&years=${years}`, fetcher)
 
     // const rankingData = rankings[publication_id];
 
@@ -41,7 +41,7 @@ const ScatterPlot = ({ publication_id, year }: ScatterPlotProps): JSX.Element =>
 
     useEffect(() => {
         if (data) {
-            addRankings(data.newRankings, year);
+            addRankings(data.newRankings, years);
         }
     }, [data])
 
@@ -49,7 +49,7 @@ const ScatterPlot = ({ publication_id, year }: ScatterPlotProps): JSX.Element =>
     const handleBrushData = (name: string, value: any) => {
         console.log(value);
         const { x1, x2, y1, y2 } = value as BrushSelectionData;
-        brushSelection(x1, x2, y1, y2, year, publication_id);
+        brushSelection(x1, x2, y1, y2, years, publication_id);
     }
 
 

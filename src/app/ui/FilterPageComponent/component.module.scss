@@ -1,0 +1,14 @@
+.hovered {
+    border: 2px solid black;
+}
+
+.unHovered {
+    opacity: 0.6
+}
+
+.selectorRow {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 5px;
+}

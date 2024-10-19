@@ -11,7 +11,7 @@ import { fetcher } from '@/app/lib/fetcher';
 
 interface BarChartProps {
     publication_id: number,
-    year: number
+    years: number[]
 }
 
 interface BarData {
@@ -19,16 +19,6 @@ interface BarData {
     bin1: number,
     count: number
 }
-
-// const fetcher = async (url: string) => {
-//     const res = await fetch(url);
-//     if (!res.ok) {
-//         throw new Error('Failed to fetch');
-//     }
-//     const data = await res.json();
-//     console.log('Fetched data:', data); // Log the fetched data
-//     return data;
-// };
 
 function smallestScoreDifference(data: Review[]) {
     if (data) {
@@ -56,7 +46,7 @@ function smallestScoreDifference(data: Review[]) {
 }
 
 
-const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
+const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
     // Grab theme
     const { theme } = useTheme();
 
@@ -67,14 +57,13 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     const clickBarSelection = useDataStore((state) => state.clickBarSelection);
     const selectedAlbumIds = useDataStore((state) => state.selectedAlbumIds);
 
-    // const reviews = useDataStore((state) => state.reviews);
 
     const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
 
     // Generate state for tracking marks for clicked bars
     const [clickedData, setClickedData] = useState<BarData[]>([]);
 
-    const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&year=${year}`, fetcher)
+    const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&years=${years}`, fetcher)
 
 
     // Generate step size for particular publication
@@ -89,13 +78,18 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
         setClickedData((prev: BarData[]) => {
             let updatedState = [...prev];
 
-            if (selectedAlbumIds[year] && selectedAlbumIds[year][publication_id] && selectedAlbumIds[year][publication_id][`${value.bin0},${value.bin1}`]) {
+            // Remove selection if all
+
+            const allSelected = years.every((year) => selectedAlbumIds[year] && selectedAlbumIds[year][publication_id] && selectedAlbumIds[year][publication_id][`${value.bin0},${value.bin1}`])
+
+            if (allSelected) {
                 updatedState = prev.filter((entry: BarData) => entry.bin0 !== value.bin0)
+                // Add all
             } else if (!updatedState.some(entry => entry.bin0 === value.bin0 && entry.bin1 === value.bin1)) {
                 updatedState.push({ 'bin0': value.bin0, 'bin1': value.bin1, 'count': value.count })
             }
 
-            clickBarSelection(value.bin0, value.bin1, publication_id, year);
+            clickBarSelection(value.bin0, value.bin1, publication_id, years);
 
             return updatedState;
         })
@@ -114,26 +108,41 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
     useEffect(() => {
 
         // Handle initializing clicked bar marks when navigating back to page
-        if (!(year in selectedAlbumIds) || !(publication_id in selectedAlbumIds[year])) {
+
+        const allYears = years.every((year) => year in selectedAlbumIds && publication_id in selectedAlbumIds[year])
+        if (!(allYears)) {
             return
         }
         const barsSelected: BarData[] = [];
-        Object.keys(selectedAlbumIds[year][publication_id]).forEach((bin) => {
-            const bins = bin.split(',').map(Number)
+        const trackedBins = Object.keys(selectedAlbumIds[years[0]][publication_id]);
+        for (let i = 1; i < years.length; i++) {
+            const year = years[i];
+            const bins = Object.keys(selectedAlbumIds[year][publication_id]);
+            // Remove anything from trackedBins that isn't in the current set of bins.
+            trackedBins.filter((trackedBin) => bins.includes(trackedBin));
+        }
+
+        trackedBins.forEach(trackedBin => {
+            const bins = trackedBin.split(',').map(Number);
+            let total = 0;
+            years.forEach(year => {
+                console.log(total);
+                total = total + selectedAlbumIds[year][publication_id][trackedBin].length;
+            })
+            // const total = years.reduce((sum, year) => sum + (selectedAlbumIds[year][publication_id][trackedBin]?.length || 0), 0);
             barsSelected.push({
                 "bin0": bins[0],
                 "bin1": bins[1],
-                "count": selectedAlbumIds[year][publication_id][bin].length
+                "count": total
             })
         })
-
         setClickedData(barsSelected)
 
     }, [])
 
     useEffect(() => {
         if (data) {
-            addReviews(data.newReviews, year);
+            addReviews(data.newReviews, years);
         }
     }, [data])
 
@@ -283,6 +292,7 @@ const BarChart = ({ publication_id, year }: BarChartProps): JSX.Element => {
             ]
         }
     }
+
     if (isLoading) return (
         <div style={{ width: '450px', height: '275px', display: 'flex', flex: 1, justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '80px', fontSize: '1.2rem' }}>

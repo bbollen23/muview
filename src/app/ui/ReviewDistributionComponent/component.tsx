@@ -7,7 +7,18 @@ import { useState } from "react";
 
 
 interface ReviewDistributionComponentProps {
-    combineYears?: boolean;
+    combineYears: boolean;
+}
+
+interface YearSectionProps {
+    children: React.ReactNode;
+    year: number;
+    index: number
+}
+
+interface ChartProps {
+    publication: Publication;
+    years: number[];
 }
 
 const ReviewDistributionComponent = ({ combineYears }: ReviewDistributionComponentProps): JSX.Element => {
@@ -26,36 +37,57 @@ const ReviewDistributionComponent = ({ combineYears }: ReviewDistributionCompone
         })
     }
 
+    const YearSection = ({ children, index, year }: YearSectionProps) => {
+        return (
+            <div key={`${year}-${index}-bar`} className={styles.yearSectionContainer}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--bp-theme-border-color)', margin: '10px 0px', paddingBottom: '5px' }}>
+                    <div><h1 style={{ margin: 0, padding: 0 }}>{year}</h1></div>
+                    <Icon size="sm" icon={barsCollapsed[index] ? `bi bi-chevron-up` : `bi bi-chevron-down`} onClick={() => handleCollapseClick(index)} />
+                </div>
+                {barsCollapsed[index] ? null : <div className={styles.dataContainer}>
+                    {children}
+                </div>}
+            </div>
+        )
+    }
+
+
+
+    const Chart = ({ publication, years }: ChartProps) => {
+        return (
+            <div key={publication.id} className={styles.chartContainer}>
+                <div>
+                    <div className={styles.header}>
+                        <Icon icon="bi bi-house" />
+                        <div className={styles.publicationName}>
+                            {publication.name}
+                        </div>
+                    </div>
+                    <BarChart years={years} publication_id={publication.id} />
+                </div>
+            </div>
+        )
+    }
+
+    if (combineYears) return (
+        <Scrollable width="100%" height="calc(100vh - 340px)">
+            <div className={styles.dataContainer} style={{ marginTop: '40px' }}>
+                {publicationsSelected.map((publication: Publication) => {
+                    return <Chart publication={publication} years={selectedYears} />
+                })}
+            </div>
+        </Scrollable>
+    )
 
     return (
-        <Scrollable width="100%" height="calc(100vh - 240px)">
+        <Scrollable width="100%" height="calc(100vh - 340px)">
             {selectedYears.map((year: number, barIdx: number) =>
-                <div key={`${year}-${barIdx}-bar`} className={styles.yearSectionContainer}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--bp-theme-border-color)', margin: '10px 0px', paddingBottom: '5px' }}>
-                        <div><h1 style={{ margin: 0, padding: 0 }}>{year}</h1></div>
-                        <Icon size="sm" icon={barsCollapsed[barIdx] ? `bi bi-chevron-up` : `bi bi-chevron-down`} onClick={() => handleCollapseClick(barIdx)} />
-                    </div>
-                    {barsCollapsed[barIdx] ? null : <div className={styles.dataContainer}>
-                        {publicationsSelected.map((publication: Publication) => {
-                            return (
-                                <div key={publication.id} className={styles.chartContainer}>
-                                    <div>
-                                        <div className={styles.header}>
-                                            <Icon icon="bi bi-house" />
-                                            <div className={styles.publicationName}>
-                                                {publication.name}
-                                            </div>
-                                        </div>
-                                        <BarChart year={year} publication_id={publication.id} />
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>}
-                </div>
+                <YearSection index={barIdx} year={year}>
+                    {publicationsSelected.map((publication: Publication) => {
+                        return <Chart publication={publication} years={[year]} />
+                    })}
+                </YearSection>
             )}
-
-
         </Scrollable>
     )
 }
