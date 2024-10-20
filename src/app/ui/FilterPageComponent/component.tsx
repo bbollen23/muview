@@ -7,9 +7,6 @@ import { Card, Button, Divider, Scrollable, Tabs, LoadingIcon } from '@bbollen23
 import dynamic from "next/dynamic";
 
 
-
-
-
 interface FilterComponentProps {
     filter: Filter,
     add: boolean

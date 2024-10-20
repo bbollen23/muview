@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
-import type { Review } from '@/app/lib/definitions';
+import type { Review, Publication } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import useSWR from 'swr';
 import { LoadingIcon } from '@bbollen23/brutal-paper';
@@ -64,12 +64,16 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
     const [clickedData, setClickedData] = useState<BarData[]>([]);
 
     const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&years=${years}`, fetcher)
-
+    console.log(data);
 
     // Generate step size for particular publication
     let stepSize = 5;
     if (data) {
         stepSize = Math.max(smallestScoreDifference(data.newReviews), 5);
+        console.log(stepSize);
+        if (isNaN(stepSize) || !Number.isFinite(stepSize)) {
+            stepSize = 5;
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -301,6 +305,14 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
         </div>)
 
     if (error) return <div>Oh no!</div>
+
+    if (data && data.newReviews && data.newReviews.length == 0) return (
+        <div style={{ width: '450px', height: '275px', display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ marginTop: '-80px' }}>
+                There is no review data for {publicationsSelected.find((pub: Publication) => pub.id === publication_id)?.name}.
+            </div>
+        </div>
+    )
 
     return (
         <Vega

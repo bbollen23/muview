@@ -182,6 +182,8 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
     const selectedAlbumIds = useDataStore((state) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state => state.selectedAlbumIdsRankings));
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
+    const filterPlotSelectionColors = useDataStore((state) => state.filterPlotSelectionColors);
+    const filterPlotBarColors = useDataStore((state) => state.filterPlotBarColors);
 
     const [groupListData, setGroupListData] = useState<GroupListData[]>([]);
     const [matrixData, setMatrixData] = useState<MatrixData[]>([]);
@@ -193,14 +195,6 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
 
     const toggleModal = () => {
         setModalOpened((prev) => !prev);
-    }
-
-
-    let barFillColor = '#1e40af';
-    let circleFillColor = '#1e40af';
-    if (theme === 'dark') {
-        barFillColor = '#60a5fa';
-        circleFillColor = '#60a5fa';
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -384,10 +378,13 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                         "height": { "scale": "y", "band": "true" },
                         "x": { "scale": "x", "field": "intersectionSize" },
                         "x2": { "scale": "x", "value": 0 },
+                        "cornerRadiusTopRight": { "value": 4 },
+                        "cornerRadiusBottomRight": { "value": 4 }
+
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.setLabel === datum.setLabel ? 'orange': '${barFillColor}'`
+                            "signal": `hoverData && hoverData.setLabel === datum.setLabel ? '${filterPlotSelectionColors[theme]}': '${filterPlotBarColors[theme]}'`
                         },
                     },
                 },
@@ -401,11 +398,13 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                         "width": { "scale": "xSets", "band": 1 },  // Auto-size bar width to band
                         "y": { "scale": "ySets", "field": "count" },  // Use 'count' for height
                         "y2": { "scale": "ySets", "value": 0 },  // Set y2 at the bottom
-                        "fill": { "value": barFillColor }
+                        "fill": { "value": filterPlotBarColors[theme] },
+                        "cornerRadiusTopRight": { "value": 4 },
+                        "cornerRadiusTopLeft": { "value": 4 }
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? 'orange': hoverData && hoverData.label === datum.label ? 'orange' : '${barFillColor}'`
+                            "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? '${filterPlotSelectionColors[theme]}': hoverData && hoverData.label === datum.label ? '${filterPlotSelectionColors[theme]}' : '${filterPlotBarColors[theme]}'`
                         },
                     },
                 }
@@ -419,13 +418,13 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                         "y": { "scale": "y", "field": "setLabel", "band": 0.5 },
                         "x2": { "scale": "xMatrix", "field": "x2" },
                         "y2": { "scale": "y", "field": "setLabel", "band": 0.5 },
-                        "stroke": { "value": circleFillColor },
+                        "stroke": { "value": filterPlotBarColors[theme] },
                         "strokeWidth": { "value": 1 },
                         "opacity": { "value": 1 }  // Temporarily set to 1 for debugging
                     },
                     "update": {
                         "stroke": {
-                            "signal": `hoverData && hoverData.setLabel === datum.setLabel ? 'orange': '${barFillColor}'`
+                            "signal": `hoverData && hoverData.setLabel === datum.setLabel ? '${filterPlotSelectionColors[theme]}': '${filterPlotBarColors[theme]}'`
                         },
                     },
 
@@ -443,12 +442,16 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                             "band": 0.5
                         },
                         "size": { "value": 150 },
-                        "fill": { "value": circleFillColor },
-                        "fillOpacity": { "signal": "datum.visible ? 1 : 0.05" }
+                        "fill": { "value": filterPlotBarColors[theme] },
+                        "fillOpacity": { "signal": `datum.visible ? 1 : '${theme}' === 'light' ? 0.25 : 0.05` },
+                        "stroke": { "value": "black" }
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.setLabel === datum.setLabel && datum.visible ? 'orange': hoverData && hoverData.label && datum.visible && scale('xSets', hoverData.label) === scale('xMatrix',datum.x) ? 'orange' : '${barFillColor}'`
+                            "signal": `hoverData && hoverData.setLabel === datum.setLabel && datum.visible ? '${filterPlotSelectionColors[theme]}': hoverData && hoverData.label && datum.visible && scale('xSets', hoverData.label) === scale('xMatrix',datum.x) ? '${filterPlotSelectionColors[theme]}' : '${filterPlotBarColors[theme]}'`
+                        },
+                        "strokeWidth": {
+                            "signal": ` datum.visible ? 2: 0`
                         },
                     },
                 }

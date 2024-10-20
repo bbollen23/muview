@@ -64,7 +64,8 @@
     border-radius: 4px;
     transition: opacity 0.2s ease;
     pointer-events: none;
-    border: 2px solid hsl(var(--gray-900));
+    border: 1px solid var(--bp-theme-card-border-color);
+    box-shadow: -4px 4px 4px hsl(var(--gray-900));
     padding: 10px;
     z-index: 1000;
     position: absolute;
@@ -74,7 +75,8 @@
 }
 
 .albumToolTipDark {
-    border: 2px solid hsl(var(--gray-100));
+    background-color: hsl(var(--slate-800));
+    box-shadow: -4px 4px 4px var(--bp-theme-card-shadow-color);
 }
 
 .reviewSection {

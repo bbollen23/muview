@@ -4,6 +4,5 @@ export const fetcher = async (url: string) => {
         throw new Error('Failed to fetch');
     }
     const data = await res.json();
-    console.log('Fetched data:', data); // Log the fetched data
     return data;
 };

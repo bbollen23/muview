@@ -96,17 +96,14 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
     const selectedAlbumIds = useDataStore((state) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state) => state.selectedAlbumIdsRankings)
     const selectedFilters = useDataStore((state) => state.selectedFilters);
+    const filterPlotSelectionColors = useDataStore((state) => state.filterPlotSelectionColors);
+    const filterPlotBarColors = useDataStore((state) => state.filterPlotBarColors);
+
 
     const [modalOpened, setModalOpened] = useState<boolean>(false);
 
     const toggleModal = () => {
         setModalOpened((prev) => !prev);
-    }
-
-
-    let barFillColor = '#1e40af';
-    if (theme === 'dark') {
-        barFillColor = '#60a5fa';
     }
 
     const [genreData, setGenreData] = useState<Record<string, number[]>>({});
@@ -137,8 +134,6 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
     const signalListeners = {
         "hoverData": handleHoverData
     };
-
-    console.log('rendering');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let spec: any = {};
@@ -209,7 +204,6 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
                 "labels": false,
                 "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "labelPadding": 2,
-                // "title": "Number of Albums",  // Add the title property for the x-axis
                 "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "titlePadding": 10,
                 "titleFontSize": 16,        // Set the font size
@@ -227,10 +221,12 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
                         "height": { "scale": "y", "band": "true" },
                         "x": { "scale": "x", "field": "count" },
                         "x2": { "scale": "x", "value": 0 },
+                        "cornerRadiusTopRight": { "value": 4 },
+                        "cornerRadiusBottomRight": { "value": 4 }
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.label === datum.label ? 'orange' : '${barFillColor}'`
+                            "signal": `hoverData && hoverData.label === datum.label ? '${filterPlotSelectionColors[theme]}' : '${filterPlotBarColors[theme]}'`
                         }
                     }
                 },
@@ -251,7 +247,7 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.label === datum.label ? 'orange' : '${getCSSVariableValue('--bp-theme-text-color', theme)}'`
+                            "signal": `hoverData && hoverData.label === datum.label ? '${filterPlotSelectionColors[theme]}' : '${getCSSVariableValue('--bp-theme-text-color', theme)}'`
                         }
                     }
                 }
@@ -273,7 +269,7 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
                     },
                     "update": {
                         "fill": {
-                            "signal": `hoverData && hoverData.label === datum.label ? 'orange' : '${getCSSVariableValue('--bp-theme-text-color', theme)}'`
+                            "signal": `hoverData && hoverData.label === datum.label ? '${filterPlotSelectionColors[theme]}' : '${getCSSVariableValue('--bp-theme-text-color', theme)}'`
                         }
                     }
                 }

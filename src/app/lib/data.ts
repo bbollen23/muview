@@ -26,6 +26,7 @@ export async function fetchReviews(publication_ids: number[], years_list: number
             FROM reviews
             WHERE publication_id IN (${publication_ids_string}) AND year IN (${years_string})`);
         const reviews = data.rows;
+        console.log(reviews)
         return reviews;
     } catch (error) {
         console.error('Database Error:', error)

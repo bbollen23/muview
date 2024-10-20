@@ -5,7 +5,6 @@ import type { Filter, Publication, Review, Ranking, CurrentReviews, CurrentRanki
 export type DataStoreState = {
     // Used
     publicationsSelected: Publication[];
-    chartColorScheme: string[];
     selectedYears: number[];
     reviews: CurrentReviews;
     rankings: CurrentRankings;
@@ -13,6 +12,11 @@ export type DataStoreState = {
     selectedAlbumIdsRankings: AlbumIdsSelectedRanking;
     combineYearsDashboard: boolean;
     selectedFilters: Filter[];
+
+    // Coloring
+    chartColorScheme: string[];
+    filterPlotSelectionColors: Record<string, string>;
+    filterPlotBarColors: Record<string, string>
 
     // Currently unused
     loading: boolean;
@@ -58,7 +62,9 @@ export const defaultInitialState: DataStoreState = {
     selectedAlbumIds: {},
     selectedAlbumIdsRankings: {},
     combineYearsDashboard: false,
-    selectedFilters: []
+    selectedFilters: [],
+    filterPlotSelectionColors: {},
+    filterPlotBarColors: {}
 }
 
 export const initDataStore = (): DataStoreState => {
@@ -80,7 +86,16 @@ export const initDataStore = (): DataStoreState => {
         selectedAlbumIds: {},
         selectedAlbumIdsRankings: {},
         combineYearsDashboard: false,
-        selectedFilters: []
+        selectedFilters: [],
+        filterPlotSelectionColors: {
+            "dark": 'orange',
+            "light": '#c2410c'
+        },
+        filterPlotBarColors: {
+            'light': '#1e40af',
+            "dark": '#60a5fa'
+        },
+
     }
 }
 

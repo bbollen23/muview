@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const years_list = years?.split(',').map(Number);
     if (publication_ids_list && years_list) {
         const newReviews = await fetchReviews(publication_ids_list, years_list);
+        console.log(newReviews);
         if (newReviews) {
             return Response.json({ newReviews })
         }
