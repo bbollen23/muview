@@ -4,8 +4,12 @@ import type { Publication } from './definitions';
 export async function fetchPublications() {
     try {
         const data = await sql<Publication>`
-            SELECT *
-            FROM publications`;
+        SELECT p.id AS id, p.name AS name, p.unique_name AS unique_name, p.description AS description, round(avg(r.score) / 10, 2) AS avg_score, count(distinct r.id) AS number_of_reviews
+        FROM publications AS p
+        LEFT JOIN reviews AS r
+        ON p.id = r.publication_id
+        GROUP BY p.id, p.name, p.unique_name, p.description
+        ORDER BY number_of_reviews desc`;
 
         const publications = data.rows;
         return publications;

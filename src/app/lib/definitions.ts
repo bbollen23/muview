@@ -2,8 +2,11 @@ export interface Publication {
     id: number,
     name: string,
     unique_name: string,
-    description: string
+    description: string,
+    avg_score?: number,
+    number_of_reviews?: number
 }
+
 
 export interface BinnedAlbums {
     [key: string]: Album[]

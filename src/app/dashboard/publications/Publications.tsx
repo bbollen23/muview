@@ -1,8 +1,8 @@
 'use client'
 import styles from "./page.module.css";
-import { Button, Card, Input, Scrollable } from "@bbollen23/brutal-paper";
+import { Button, Card, Input, Scrollable, Tooltip, Icon } from "@bbollen23/brutal-paper";
 import { useDataStore } from "@/providers/data-store-provider";
-import { type Publication } from "@/app/lib/definitions";
+import type { Publication } from "@/app/lib/definitions";
 import { useState } from "react";
 
 interface PublicationProps {
@@ -40,6 +40,44 @@ export default function Publications({ publications }: PublicationProps) {
         setSearchTermSelected(event.target.value); // Update the search term state
     };
 
+    interface PublicationCardProps {
+        publication: Publication,
+        add: boolean
+    }
+    const PublicationCard = ({ publication, add }: PublicationCardProps) => {
+        return (
+            <Card
+                title={publication.name}
+                style={{ opacity: publicationSelected(publication) && add ? 0.4 : 1 }}
+                actionPosition='right'
+                size="sm"
+                actions={
+                    <Button
+                        flat
+                        label={add ? 'Add Publication' : 'Remove Publication'}
+                        onClick={add ? () => handleAddPublication(publication) : () => handleRemovePublication(publication)}
+                    />
+                }
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ display: 'flex', marginTop: '20px', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <Tooltip content="Number of Reviews">
+                            <Icon size="sm" type="none" icon='bi bi-file-earmark' dense />
+                        </Tooltip>
+                        <div style={{ marginLeft: '10px', fontSize: '1.1rem' }}>{publication.number_of_reviews}</div>
+                    </div>
+                    <div style={{ display: 'flex', marginTop: '20px', justifyContent: 'flex-start', alignItems: 'center' }}>
+                        <Tooltip content="Avg Score">
+                            <Icon size="sm" type="none" icon='bi bi-graph-up' dense />
+                        </Tooltip>
+                        <div style={{ marginLeft: '10px', fontSize: '1.1rem' }}>{publication.avg_score}</div>
+                    </div>
+                </div>
+
+            </Card>
+        )
+    }
+
     return (
         <div className={styles.publicationsContainer}>
             <div className={styles.innerPublicationsContainer}>
@@ -51,21 +89,10 @@ export default function Publications({ publications }: PublicationProps) {
                 </div>
                 <Scrollable width="100%" height="calc(100vh - 330px)">
                     {publicationsSelected.filter((publication: Publication) => publication.name.toLowerCase().includes(searchTermSelected.toLowerCase())).map((publication: Publication) => (
-                        <Card
-                            title={publication.name}
+                        <PublicationCard
                             key={publication.id}
-                            size="sm"
-                            actions={
-                                <Button
-                                    flat
-                                    label="Remove"
-                                    onClick={() => handleRemovePublication(publication)}
-                                />
-                            }
-                        >
-                            {/* {publication.description} */}
-                            Here is a generic description about a particular publication. We might want to search for these and get things for all of them.
-                        </Card>
+                            publication={publication}
+                            add={false} />
                     ))}
                 </Scrollable>
             </div>
@@ -78,24 +105,11 @@ export default function Publications({ publications }: PublicationProps) {
                 </div>
                 <Scrollable width="100%" height="calc(100vh - 330px)">
                     {publications.filter((publication: Publication) => publication.name.toLowerCase().includes(searchTermAll.toLowerCase())).map((publication: Publication) => (
-
-                        <Card
-                            title={publication.name}
+                        <PublicationCard
+                            publication={publication}
                             key={publication.id}
-                            size="sm"
-                            style={{ opacity: publicationSelected(publication) ? 0.4 : 1 }}
-                            actions={
-                                <Button
-                                    flat
-                                    label="Add"
-                                    disabled={publicationSelected(publication)}
-                                    onClick={() => handleAddPublication(publication)}
-                                />
-                            }
-                        >
-                            {/* {publication.description} */}
-                            Here is a generic description about a particular publication. We might want to search for these and get things for all of them.
-                        </Card>
+                            add={true}
+                        />
                     ))}
                 </Scrollable>
             </div>
