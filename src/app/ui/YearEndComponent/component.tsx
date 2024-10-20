@@ -74,7 +74,7 @@ const YearEndComponent = ({ combineYears }: YearEndComponentProps) => {
         <Scrollable width="100%" height="calc(100vh - 340px)">
             <div className={styles.dataContainer} style={{ marginTop: '40px' }}>
                 {publicationsSelected.map((publication: Publication) => {
-                    return <Chart publication={publication} years={selectedYears} />
+                    return <Chart key={`scatterPlot-${publication.id}-${selectedYears.join('-')}`} publication={publication} years={selectedYears} />
                 })}
             </div>
         </Scrollable>
@@ -83,9 +83,9 @@ const YearEndComponent = ({ combineYears }: YearEndComponentProps) => {
     return (
         <Scrollable width="100%" height="calc(100vh - 340px)">
             {selectedYears.map((year: number, barIdx: number) =>
-                <YearSection index={barIdx} year={year}>
+                <YearSection key={`year-section-${year}`} index={barIdx} year={year}>
                     {publicationsSelected.map((publication: Publication) => {
-                        return <Chart publication={publication} years={[year]} />
+                        return <Chart key={`scatterPlot-${publication.id}-${year}`} publication={publication} years={[year]} />
                     })}
                 </YearSection>
             )}

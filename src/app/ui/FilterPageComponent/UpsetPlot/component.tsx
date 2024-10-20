@@ -4,7 +4,7 @@ import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
 import { useDataStore } from "@/providers/data-store-provider";
-import { AlbumIdsSelected, AlbumIdsSelectedRanking, Publication, Filter, FilterType } from '@/app/lib/definitions';
+import { AlbumIdsSelected, AlbumIdsSelectedRanking, Publication, Filter } from '@/app/lib/definitions';
 import { Modal, ModalContent, ModalHeader, Button, Icon } from '@bbollen23/brutal-paper';
 import Link from 'next/link';
 
@@ -55,11 +55,11 @@ const generateMatrixData = (data: UpsetData[]): MatrixData[] => {
 
 const generateGroups = (selectedAlbumIds: AlbumIdsSelected, selectedAlbumIdsRankings: AlbumIdsSelectedRanking): GroupList => {
     const groupList: Record<string, number[]> = {};
-    Object.entries(selectedAlbumIds).forEach(([year, pubIdRecord]) => {
+    Object.values(selectedAlbumIds).forEach((pubIdRecord) => {
         Object.entries(pubIdRecord).forEach(([pubId, binnedAlbums]) => {
-            let pubIdString = `${pubId}`;
+            const pubIdString = `${pubId}`;
             Object.entries(binnedAlbums).forEach(([bin, albumIds]) => {
-                let binString = `${pubIdString}-${bin}`;
+                const binString = `${pubIdString}-${bin}`;
                 if (groupList[binString]) {
                     // If group already exists, concatenate albumIds
                     groupList[binString] = groupList[binString].concat(albumIds);
@@ -70,9 +70,9 @@ const generateGroups = (selectedAlbumIds: AlbumIdsSelected, selectedAlbumIdsRank
         })
     });
 
-    Object.entries(selectedAlbumIdsRankings).forEach(([year, pubIdRecord]) => {
+    Object.values(selectedAlbumIdsRankings).forEach((pubIdRecord) => {
         Object.entries(pubIdRecord).forEach(([pubId, albumIds]) => {
-            let pubIdString = `${pubId}-brush`;
+            const pubIdString = `${pubId}-brush`;
             if (groupList[pubIdString]) {
                 groupList[pubIdString] = groupList[pubIdString].concat(albumIds);
             } else {
@@ -88,7 +88,7 @@ const generateUpsetDataExclusive = (groupList: Record<string, number[]>): UpsetD
     const keys = Object.keys(groupList);  // The keys of the groups (e.g., "2023-19-65,70", etc.)
     const numSets = keys.length;  // Number of sets
     const numIntersections = Math.pow(2, numSets);  // 2^numSets combinations
-    let intersections: UpsetData[] = [];
+    const intersections: UpsetData[] = [];
 
     // Helper function to calculate the intersection of a specific combination of sets
     const calculateIntersection = (sets: number[]): number[] => {
@@ -110,11 +110,11 @@ const generateUpsetDataExclusive = (groupList: Record<string, number[]>): UpsetD
     };
 
     // Keep track of elements already accounted for in larger intersections
-    let accountedElements = new Set<number>();
+    const accountedElements = new Set<number>();
 
     // Iterate over all possible intersections, starting from the largest combinations (highest number of 1s)
     for (let i = numIntersections - 1; i > 0; i--) {
-        let binaryStr = i.toString(2).padStart(numSets, '0');
+        const binaryStr = i.toString(2).padStart(numSets, '0');
         const sets = binaryStr.split('').map(Number);  // Convert the binary string to an array of 1s and 0s
         let intersectingElements = calculateIntersection(sets);
 
@@ -203,7 +203,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
         circleFillColor = '#60a5fa';
     }
 
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleHoverData = (name: string, value: any) => {
         if (value) {
             if (value.setLabel) {
@@ -540,11 +540,11 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 <ModalContent style={{ marginBottom: '20px' }}>
                     <div className="flex-col gap-10">
                         <div>
-                            <p>In MuView, we use an <a href='https://upset.app/' target='_blank' style={{ textDecoration: 'underline' }}>Upset Plot</a> to visualize the exclusive intersections of the data you have selected in the main dashboard. Our goal is to allow you to find Albums which lie in the intersection of multiple groups that you have selected. For example, the UpSet Plot allows you to filter your album list down to a set of albums which only respect the combinations that you're interested in.
+                            <p>In MuView, we use an <a href='https://upset.app/' target='_blank' style={{ textDecoration: 'underline' }}>Upset Plot</a> to visualize the exclusive intersections of the data you have selected in the main dashboard. Our goal is to allow you to find Albums which lie in the intersection of multiple groups that you have selected. For example, the UpSet Plot allows you to filter your album list down to a set of albums which only respect the combinations that you&aspos;re interested in.
                             </p>
-                            <p>Whenever you select a bar in one of the distributions or make a brush selection in the year-end rankings, you will see a respective "selector" in the UpSet plot. The matrix to the left of the bar chart indicates the selectors which are being intersected and the bar chart indicates how many albums are exclusive to that intersection.</p>
+                            <p>Whenever you select a bar in one of the distributions or make a brush selection in the year-end rankings, you will see a respective &quot;selector&quot; in the UpSet plot. The matrix to the left of the bar chart indicates the selectors which are being intersected and the bar chart indicates how many albums are exclusive to that intersection.</p>
                             <p>The bar chart at the top indicates the sizes of the individual selectors you have chosen.</p>
-                            <p>When hovering over any of the bars, you'll see the "Current Hovered Data" section reflect the dataset that you are hovering over. When you add your very first filter, the Albums List to the right will only include albums within the dataset you selected. All additional upset plot filters will be unioned with the existing album list. This means you can find albums that have specific scores on multiple publications instead.</p>
+                            <p>When hovering over any of the bars, you&aspos;ll see the &quot;Current Hovered Data&quot; section reflect the dataset that you are hovering over. When you add your very first filter, the Albums List to the right will only include albums within the dataset you selected. All additional upset plot filters will be unioned with the existing album list. This means you can find albums that have specific scores on multiple publications instead.</p>
                         </div>
                     </div>
                 </ModalContent>

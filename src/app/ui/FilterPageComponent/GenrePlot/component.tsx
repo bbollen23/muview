@@ -9,7 +9,6 @@ import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
 import { LoadingIcon, Scrollable, Modal, ModalContent, ModalHeader, Button, Icon } from '@bbollen23/brutal-paper';
 import { getAlbumIdsFromFilters } from '@/app/lib/filterAlbums';
-import styles from './component.module.scss'
 
 interface AlbumGenres {
     id: number,
@@ -106,10 +105,8 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
 
 
     let barFillColor = '#1e40af';
-    let circleFillColor = '#1e40af';
     if (theme === 'dark') {
         barFillColor = '#60a5fa';
-        circleFillColor = '#60a5fa';
     }
 
     const [genreData, setGenreData] = useState<Record<string, number[]>>({});
@@ -123,10 +120,7 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
         `/api/genres?album_ids=${flatAlbumIds}`,
         fetcher)
 
-    // const handleHoverData = (name: string, value: any) => {
-    //     // console.log(value);
-    // }
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleHoverData = (name: string, value: any) => {
         if (value) {
             const albumIds = genreData[value.label];
@@ -146,6 +140,7 @@ const GenrePlot = ({ onHover }: GenrePlotProps) => {
 
     console.log('rendering');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let spec: any = {};
     spec = {
         "$schema": "https://vega.github.io/schema/vega/v5.json",

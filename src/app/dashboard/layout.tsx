@@ -17,8 +17,6 @@ import {
     DrawerHeader,
     DrawerItem,
     LoadingOverlay,
-    SwitchGroup,
-    Divider
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';

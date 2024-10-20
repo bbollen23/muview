@@ -1,13 +1,9 @@
 'use client'
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { Vega } from "react-vega";
-import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
-import { useTheme } from '@/providers/theme-provider';
+import React, { useState, useCallback, useMemo } from 'react'
 import { useDataStore } from "@/providers/data-store-provider";
-import { AlbumIdsSelected, AlbumIdsSelectedRanking, Publication, Filter } from '@/app/lib/definitions';
+import { Publication, Filter } from '@/app/lib/definitions';
 import styles from './component.module.scss';
-import { Card, Button, Divider, Scrollable, Tabs, LoadingOverlay, LoadingIcon } from '@bbollen23/brutal-paper';
-import { GenrePlot, UpsetPlot } from '@/app/ui';
+import { Card, Button, Divider, Scrollable, Tabs, LoadingIcon } from '@bbollen23/brutal-paper';
 import dynamic from "next/dynamic";
 
 
@@ -28,11 +24,6 @@ const pillColors = [
     '#7c3aed', // purple 600
 ]
 
-interface ReadableLabelData {
-    label: string;
-    readableLabel: string;
-}
-
 const getReadableLabel = (label: string, publicationsSelected: Publication[]) => {
     const labelSplit = label.split('-');
     const pubName = publicationsSelected.find((pub: Publication) => pub.id === parseInt(labelSplit[0]))?.name;
@@ -47,21 +38,8 @@ const getReadableLabel = (label: string, publicationsSelected: Publication[]) =>
     return `${pubName} - ${suffix}`
 }
 
-const getReadableLabels = (groupList: Record<string, number[]>, publicationsSelected: Publication[]) => {
-    const readableLabels: ReadableLabelData[] = []
-    Object.keys(groupList).forEach((label: string) => {
-        readableLabels.push({
-            label,
-            readableLabel: getReadableLabel(label, publicationsSelected)
-        })
-    })
-    return readableLabels;
-}
-
 
 const FilterPageComponent = (): JSX.Element => {
-    // Grab theme
-    const { theme } = useTheme();
 
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const selectedFilters = useDataStore((state) => state.selectedFilters);
@@ -143,7 +121,7 @@ const FilterPageComponent = (): JSX.Element => {
             <>
                 {selectedFilters.map((filter: Filter) => {
                     return (
-                        <FilterComponent filter={filter} add={false} />
+                        <FilterComponent key={filter.id} filter={filter} add={false} />
                     )
                 })}
             </>
