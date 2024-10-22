@@ -1,3 +1,24 @@
+.filtersPageContainer {
+    display: grid;
+    grid-template-columns: 700px 1fr;
+    height: calc(100vh - 160px);
+}
+
+.hoveredDataContainer {
+    height: 100%;
+    border-left: 1px solid var(--bp-theme-border-color);
+}
+
+.currentHoveredDataTitle {
+    margin: 0px;
+    padding: 0px 0px 0px 20px;
+}
+
+.chosenFiltersTitle {
+    margin: 40px 0px 0px 0px;
+    padding: 0px 0px 0px 20px;
+}
+
 .hovered {
     border: 2px solid black;
 }
@@ -11,4 +32,42 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 5px;
+}
+
+.filterSelectorsTitle {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.filterStatisticsTitle {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 20px 0px 10px 0px;
+}
+
+.filterStatisticsContent {
+    font-size: 0.9rem;
+}
+
+.noFiltersSelected {
+    margin: 0px 0px 20px 20px;
+}
+
+.lazyLoadingComponentWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.lazyLoadingComponentContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 200px;
+}
+
+.lazyLoadingComponentContent {
+    font-size: 1.2rem;
 }

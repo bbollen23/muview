@@ -1,18 +1,3 @@
-.hovered {
-    border: 2px solid black;
-}
-
-.unHovered {
-    opacity: 0.6
-}
-
-.selectorRow {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
 .infoModalButton {
     position: absolute;
     top: 5px;
@@ -27,4 +12,58 @@
     &:hover .infoModalButtonText {
         text-decoration: underline;
     }
+}
+
+
+.selectorIconContainer {
+    width: 100%;
+    z-index: 5;
+    background-color: var(--bp-theme-background-color);
+    border-bottom: 1px solid var(--bp-theme-border-color);
+    position: absolute;
+    left: 0px;
+}
+
+.selectorIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    position: absolute;
+    height: 50px;
+    z-index: 5;
+}
+
+.selectorIconBinDisplay {
+    transform: rotate(-45deg);
+    position: absolute;
+    left: 15.5px;
+    top: -12px;
+    text-align: center;
+    font-size: 0.7rem;
+    width: max-content;
+}
+
+.selectorIconRankingDisplay {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.optionsContainer {
+    position: absolute;
+    z-index: 6;
+    top: 5px;
+    right: 1px;
+    display: flex;
+    flex-direction: row;
+}
+
+.minSelectorsContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }

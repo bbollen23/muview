@@ -12,6 +12,8 @@ export type DataStoreState = {
     selectedAlbumIdsRankings: AlbumIdsSelectedRanking;
     combineYearsDashboard: boolean;
     selectedFilters: Filter[];
+    upsetConsolidate: boolean;
+    upsetInclusive: boolean;
 
     // Coloring
     chartColorScheme: string[];
@@ -36,6 +38,8 @@ export type DataStoreActions = {
     toggleCombineYears: () => void;
     addFilter: (filter: Filter) => void;
     removeFilter: (filter: Filter) => void;
+    toggleConsolidate: () => void;
+    toggleInclusive: () => void;
 
 
     // Currently Unused
@@ -64,7 +68,9 @@ export const defaultInitialState: DataStoreState = {
     combineYearsDashboard: false,
     selectedFilters: [],
     filterPlotSelectionColors: {},
-    filterPlotBarColors: {}
+    filterPlotBarColors: {},
+    upsetConsolidate: false,
+    upsetInclusive: false,
 }
 
 export const initDataStore = (): DataStoreState => {
@@ -95,6 +101,8 @@ export const initDataStore = (): DataStoreState => {
             'light': '#1e40af',
             "dark": '#60a5fa'
         },
+        upsetConsolidate: false,
+        upsetInclusive: false
 
     }
 }
@@ -104,6 +112,21 @@ export const createDataStore = (
 ) => {
     return createStore<DataStore>()((set) => ({
         ...initState,
+        toggleConsolidate: () => {
+            console.log('toggled!')
+            set((state) => ({
+                upsetConsolidate: !state.upsetConsolidate
+            }))
+        },
+        toggleInclusive: () => {
+            console.log('toggled inclusive')
+            set((state) => {
+                console.log(state.upsetInclusive);
+                return {
+                    upsetInclusive: !state.upsetInclusive
+                }
+            })
+        },
         addFilter: ((filter: Filter) => {
             set((state) => ({
                 selectedFilters: [...state.selectedFilters, filter]

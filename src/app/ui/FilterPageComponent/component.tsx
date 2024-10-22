@@ -1,10 +1,11 @@
 'use client'
 import React, { useState, useCallback, useMemo } from 'react'
 import { useDataStore } from "@/providers/data-store-provider";
-import { Publication, Filter } from '@/app/lib/definitions';
+import { Filter } from '@/app/lib/definitions';
 import styles from './component.module.scss';
 import { Card, Button, Divider, Scrollable, Tabs, LoadingIcon } from '@bbollen23/brutal-paper';
 import dynamic from "next/dynamic";
+import { parseLabel } from '@/app/lib/parseLabel';
 
 
 interface FilterComponentProps {
@@ -12,36 +13,14 @@ interface FilterComponentProps {
     add: boolean
 }
 
-const pillColors = [
-    '#2dd4bf', //teal 400,
-    '#84cc16', // lime 500,
-    '#d946ef', //fuchsia 500
-    '#9d174d', //pink 800,
-    '#fb7185', // rose 400,
-    '#7c3aed', // purple 600
-]
-
-const getReadableLabel = (label: string, publicationsSelected: Publication[]) => {
-    const labelSplit = label.split('-');
-    const pubName = publicationsSelected.find((pub: Publication) => pub.id === parseInt(labelSplit[0]))?.name;
-
-    const binOrScore = labelSplit[1];
-    let suffix = '';
-    if (binOrScore !== 'brush') {
-        suffix = binOrScore.replace(',', ' to ');
-    } else {
-        suffix = 'Rankings'
-    }
-    return `${pubName} - ${suffix}`
-}
-
-
 const FilterPageComponent = (): JSX.Element => {
 
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const selectedFilters = useDataStore((state) => state.selectedFilters);
     const addFilter = useDataStore((state) => state.addFilter);
     const removeFilter = useDataStore((state) => state.removeFilter);
+    const upsetConsolidate = useDataStore((state) => state.upsetConsolidate);
+    const chartColorScheme = useDataStore((state => state.chartColorScheme));
 
     const [hoveredInfo, setHoveredInfo] = useState<Filter | null>(null)
 
@@ -65,11 +44,12 @@ const FilterPageComponent = (): JSX.Element => {
                     />
                 }
             >
-                <div style={{ fontSize: '1rem', marginBottom: '10px', fontWeight: 'bold' }}>Selectors</div>
+                <div className={styles.filterSelectorsTitle}> Selectors</div>
                 <div className={styles.selectorRow}>
                     {filter.groupLabels.map((label: string, index: number) => {
+
                         return (
-                            <div key={label} style={{ 'backgroundColor': pillColors[index % 6] }} className="pill">
+                            <div key={label} style={{ 'backgroundColor': chartColorScheme[index % 6] }} className="pill">
                                 {label}
                             </div>
                         )
@@ -89,18 +69,23 @@ const FilterPageComponent = (): JSX.Element => {
                     />
                 }
             >
-                <div style={{ fontSize: '1rem', marginBottom: '10px', fontWeight: 'bold' }}>Selectors</div>
+                <div className={styles.filterSelectorsTitle}>Selectors</div>
                 <div className={styles.selectorRow}>
-                    {filter.groupLabels.map((label: string, index: number) => {
+                    {filter.groupLabels.map((label: string) => {
+                        const { pub_name, suffix, pub_id } = parseLabel(label, publicationsSelected, upsetConsolidate)
                         return (
-                            <div key={label} style={{ 'backgroundColor': pillColors[index % 6] }} className="pill">
-                                {getReadableLabel(label, publicationsSelected)}
+                            <div
+                                key={label}
+                                style={{ 'backgroundColor': chartColorScheme[publicationsSelected.findIndex(item => item.id === parseInt(pub_id)) % 6] }}
+                                className="pill"
+                            >
+                                {suffix ? `${pub_name} - ${suffix.replace(',', ' to ')}` : `${pub_name}`}
                             </div>
                         )
                     })}
                 </div>
-                <div style={{ fontSize: '1rem', margin: '20px 0px 10px 0px', fontWeight: 'bold' }}>Statistics</div>
-                <div style={{ fontSize: '0.9rem' }}>{filter.type === 'upset-filter' ? 'Number of Albums In Intersection: ' : 'Number of Albums in Set: '} <b>{filter.albumIds?.length}</b></div>
+                <div className={styles.filterStatisticsTitle}>Statistics</div>
+                <div className={styles.filterStatisticsContent}>{filter.type === 'upset-filter' ? 'Number of Albums In Intersection: ' : 'Number of Albums in Set: '} <b>{filter.albumIds?.length}</b></div>
             </Card>
         )
     }
@@ -113,7 +98,7 @@ const FilterPageComponent = (): JSX.Element => {
     }
 
     const SelectedFiltersComponent = () => {
-        if (selectedFilters.length === 0) return <div style={{ marginLeft: '20px', marginTop: '20px' }}>No Filters selected.</div>
+        if (selectedFilters.length === 0) return <div className={styles.noFiltersSelected}>No Filters selected.</div>
         return (
             <>
                 {selectedFilters.map((filter: Filter) => {
@@ -127,9 +112,9 @@ const FilterPageComponent = (): JSX.Element => {
 
     const LazyLoadingComponent = () => {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '200px' }}>
-                    <div style={{ fontSize: '1.2rem' }}>Loading</div>
+            <div className={styles.lazyLoadingComponentWrapper}>
+                <div className={styles.lazyLoadingComponentContainer}>
+                    <div className={styles.lazyLoadingComponentContent}>Loading</div>
                     <LoadingIcon visible={true} />
                 </div>
             </div>)
@@ -153,23 +138,21 @@ const FilterPageComponent = (): JSX.Element => {
     ]
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 500px', height: 'calc(100vh - 160px)' }}>
+        <div className={styles.filtersPageContainer}>
             <div>
                 <Tabs tabData={tabsData} />
             </div>
-            <div style={{ height: '100%', borderLeft: '1px solid var(--bp-theme-border-color)' }}>
+            <div className={styles.hoveredDataContainer}>
                 <div>
-                    <h1 style={{ margin: 0, padding: 0, paddingLeft: '20px' }}>Current Hovered Data</h1>
+                    <h1 className={styles.currentHoveredDataTitle}>Current Hovered Data</h1>
                     <HoveredInfoComponent />
-                    <h1 style={{ margin: 0, marginTop: '40px', padding: 0, paddingLeft: '20px' }}>Chosen Filters</h1>
+                    <h1 className={styles.chosenFiltersTitle}>Chosen Filters</h1>
                     <Divider />
                 </div>
                 <Scrollable height='calc(100vh - 450px)' width='100%'>
                     <SelectedFiltersComponent />
                 </Scrollable>
             </div>
-
-
         </div>
 
     );

@@ -45,9 +45,11 @@ export default function Publications({ publications }: PublicationProps) {
         add: boolean
     }
     const PublicationCard = ({ publication, add }: PublicationCardProps) => {
+        console.log(publication.unique_name);
         return (
             <Card
-                title={publication.name}
+                title={<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img className='pub-icon' src={`/images/${publication.unique_name}.webp`} width="30px" height="30px" />
+                    {publication.name}</div>}
                 style={{ opacity: publicationSelected(publication) && add ? 0.4 : 1 }}
                 actionPosition='right'
                 size="sm"
@@ -61,13 +63,13 @@ export default function Publications({ publications }: PublicationProps) {
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ display: 'flex', marginTop: '20px', justifyContent: 'flex-start', alignItems: 'center' }}>
-                        <Tooltip content="Number of Reviews">
+                        <Tooltip size="sm" content="Num of Reviews">
                             <Icon size="sm" type="none" icon='bi bi-file-earmark' dense />
                         </Tooltip>
                         <div style={{ marginLeft: '10px', fontSize: '1.1rem' }}>{publication.number_of_reviews}</div>
                     </div>
                     <div style={{ display: 'flex', marginTop: '20px', justifyContent: 'flex-start', alignItems: 'center' }}>
-                        <Tooltip content="Avg Score">
+                        <Tooltip size="sm" content="Avg Score">
                             <Icon size="sm" type="none" icon='bi bi-graph-up' dense />
                         </Tooltip>
                         <div style={{ marginLeft: '10px', fontSize: '1.1rem' }}>{publication.avg_score}</div>

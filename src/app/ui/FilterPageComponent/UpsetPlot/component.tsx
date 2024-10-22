@@ -5,8 +5,10 @@ import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
 import { useDataStore } from "@/providers/data-store-provider";
 import { AlbumIdsSelected, AlbumIdsSelectedRanking, Publication, Filter } from '@/app/lib/definitions';
-import { Modal, ModalContent, ModalHeader, Button, Icon } from '@bbollen23/brutal-paper';
+import { Modal, ModalContent, ModalHeader, Button, Icon, Tooltip, Scrollable } from '@bbollen23/brutal-paper';
 import Link from 'next/link';
+import { parseLabel } from '@/app/lib/parseLabel';
+import styles from './component.module.scss';
 
 interface UpsetData {
     setLabel: string;
@@ -53,38 +55,39 @@ const generateMatrixData = (data: UpsetData[]): MatrixData[] => {
 }
 
 
-const generateGroups = (selectedAlbumIds: AlbumIdsSelected, selectedAlbumIdsRankings: AlbumIdsSelectedRanking): GroupList => {
+const generateGroups = (selectedAlbumIds: AlbumIdsSelected, selectedAlbumIdsRankings: AlbumIdsSelectedRanking, consolidateGroups: boolean): GroupList => {
+
+    const addToGroupList = (groupString: string, albumIds: number[]) => {
+        if (groupList[groupString]) {
+            groupList[groupString] = groupList[groupString].concat(albumIds);
+        } else {
+            groupList[groupString] = albumIds;
+        }
+    };
+
+
     const groupList: Record<string, number[]> = {};
     Object.values(selectedAlbumIds).forEach((pubIdRecord) => {
         Object.entries(pubIdRecord).forEach(([pubId, binnedAlbums]) => {
             const pubIdString = `${pubId}`;
             Object.entries(binnedAlbums).forEach(([bin, albumIds]) => {
-                const binString = `${pubIdString}-${bin}`;
-                if (groupList[binString]) {
-                    // If group already exists, concatenate albumIds
-                    groupList[binString] = groupList[binString].concat(albumIds);
-                } else {
-                    groupList[binString] = albumIds;
-                }
+                const groupString = consolidateGroups ? pubIdString : `${pubIdString}-${bin}`;
+                addToGroupList(groupString, albumIds);
             })
         })
     });
 
     Object.values(selectedAlbumIdsRankings).forEach((pubIdRecord) => {
         Object.entries(pubIdRecord).forEach(([pubId, albumIds]) => {
-            const pubIdString = `${pubId}-brush`;
-            if (groupList[pubIdString]) {
-                groupList[pubIdString] = groupList[pubIdString].concat(albumIds);
-            } else {
-                groupList[pubIdString] = albumIds;
-            }
+            const groupString = consolidateGroups ? `${pubId}` : `${pubId}-brush`;
+            addToGroupList(groupString, albumIds);
         })
     });
     return groupList;
 }
 
 
-const generateUpsetDataExclusive = (groupList: Record<string, number[]>): UpsetData[] => {
+const generateUpsetDataExclusive = (groupList: Record<string, number[]>, inclusive: boolean): UpsetData[] => {
     const keys = Object.keys(groupList);  // The keys of the groups (e.g., "2023-19-65,70", etc.)
     const numSets = keys.length;  // Number of sets
     const numIntersections = Math.pow(2, numSets);  // 2^numSets combinations
@@ -119,7 +122,10 @@ const generateUpsetDataExclusive = (groupList: Record<string, number[]>): UpsetD
         let intersectingElements = calculateIntersection(sets);
 
         // Remove any elements already accounted for in larger intersections
-        intersectingElements = intersectingElements.filter(item => !accountedElements.has(item));
+        console.log('here')
+        if (!inclusive) {
+            intersectingElements = intersectingElements.filter(item => !accountedElements.has(item));
+        }
 
         const intersectionSize = intersectingElements.length;  // Number of elements in the intersection
 
@@ -146,26 +152,14 @@ const generateUpsetDataExclusive = (groupList: Record<string, number[]>): UpsetD
     return intersections;
 };
 
-const getReadableLabel = (label: string, publicationsSelected: Publication[]) => {
-    const labelSplit = label.split('-');
-    const pubName = publicationsSelected.find((pub: Publication) => pub.id === parseInt(labelSplit[0]))?.name;
-
-    const binOrScore = labelSplit[1];
-    let suffix = '';
-    if (binOrScore !== 'brush') {
-        suffix = binOrScore.replace(',', ' to ');
-    } else {
-        suffix = 'Rankings'
-    }
-    return `${pubName} - ${suffix}`
-}
-
-const getReadableLabels = (groupList: Record<string, number[]>, publicationsSelected: Publication[]) => {
+const getReadableLabels = (groupList: Record<string, number[]>, publicationsSelected: Publication[], consolidateGroups: boolean) => {
     const readableLabels: ReadableLabelData[] = []
     Object.keys(groupList).forEach((label: string) => {
+        const { pub_name, suffix } = parseLabel(label, publicationsSelected, consolidateGroups);
+
         readableLabels.push({
             label,
-            readableLabel: getReadableLabel(label, publicationsSelected)
+            readableLabel: consolidateGroups ? `${pub_name}` : suffix ? `${pub_name} - ${suffix}` : `${pub_name}`
         })
     })
     return readableLabels;
@@ -184,6 +178,10 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const filterPlotSelectionColors = useDataStore((state) => state.filterPlotSelectionColors);
     const filterPlotBarColors = useDataStore((state) => state.filterPlotBarColors);
+    const upsetConsolidate = useDataStore((state) => state.upsetConsolidate);
+    const upsetInclusive = useDataStore((state) => state.upsetInclusive);
+    const toggleConsolidate = useDataStore((state) => state.toggleConsolidate);
+    const toggleInclusive = useDataStore((state) => state.toggleInclusive);
 
     const [groupListData, setGroupListData] = useState<GroupListData[]>([]);
     const [matrixData, setMatrixData] = useState<MatrixData[]>([]);
@@ -192,6 +190,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
     const [readableLabelData, setReadableLabelData] = useState<ReadableLabelData[]>([])
 
     const [modalOpened, setModalOpened] = useState<boolean>(false);
+
 
     const toggleModal = () => {
         setModalOpened((prev) => !prev);
@@ -228,7 +227,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
     };
 
     useEffect(() => {
-        const _groupList = generateGroups(selectedAlbumIds, selectedAlbumIdsRankings);
+        const _groupList = generateGroups(selectedAlbumIds, selectedAlbumIdsRankings, upsetConsolidate);
         const _groupListData = Object.entries(_groupList).map((entry) => {
             return {
                 "label": entry[0],
@@ -236,25 +235,32 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
             }
         })
 
-        const _upsetData = generateUpsetDataExclusive(_groupList);
+        const _upsetData = generateUpsetDataExclusive(_groupList, upsetInclusive);
         const _matrixData = generateMatrixData(_upsetData);
-        const _readableLabelData = getReadableLabels(_groupList, publicationsSelected);
+        const _readableLabelData = getReadableLabels(_groupList, publicationsSelected, upsetConsolidate);
 
         setUpsetData(_upsetData);
         setMatrixData(_matrixData);
         setGroupListData(_groupListData);
         setGroupList(_groupList);
         setReadableLabelData(_readableLabelData);
-    }, [])
+    }, [upsetInclusive, upsetConsolidate])
 
+    const width = 650;
+    const xSetsBandPadding = 0.2;
+    const paddingRight = 40;
+    const paddingLeft = 0;
+    const paddingTop = 80;
+    const paddingBottom = 70;
 
+    const height = Math.max(((Object.keys(upsetData).length * 30) + 100 + paddingTop + paddingBottom), 200 + 100 + paddingTop + paddingBottom)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let spec: any = {};
     spec = {
         "$schema": "https://vega.github.io/schema/vega/v5.json",
-        "width": 620,
-        "height": 780,
+        "width": width,
+        "height": height,
         "data": [
             {
                 "name": "upsetData",
@@ -283,14 +289,14 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
             }
         ],
         "autosize": {
-            "type": "fit",
+            "type": "none",
             "contains": "padding"
         },
         "padding": {
-            "left": 10,
-            "right": 40,
-            "top": 0,
-            "bottom": 70
+            "left": paddingLeft,
+            "right": paddingRight,
+            "top": paddingTop,
+            "bottom": paddingBottom
         },
 
         "scales": [
@@ -300,7 +306,6 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "domain": { "data": "upsetData", "field": "intersectionSize" },
                 "nice": true,
                 "range": [{ "signal": "width * 0.3" }, { "signal": "width" }]
-                // "range": "width"
             },
             {
                 "name": "y",
@@ -314,20 +319,21 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "type": "band",
                 "domain": Array.from({ length: Object.keys(groupList).length }, (_, index) => index),
                 "range": [0, { "signal": "width * 0.3" }],
-                "padding": 0.3
+                "padding": xSetsBandPadding
+            },
+
+            {
+                "name": "xSets",
+                "type": "band",
+                "domain": { "data": "setData", "field": "label" },
+                "range": [0, { "signal": "width * 0.3" }],
+                "padding": xSetsBandPadding
             },
             {
                 "name": "ySets",
                 "type": "linear",
                 "domain": { "data": "setData", "field": "count" },
                 "range": [90, 0]
-            },
-            {
-                "name": "xSets",
-                "type": "band",
-                "domain": { "data": "setData", "field": "label" },
-                "range": [0, { "signal": "width * 0.3" }],
-                "padding": 0.3,
             },
             {
                 "name": "xMatrixRect",
@@ -340,7 +346,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
 
         "axes": [
             {
-                "orient": "bottom",
+                "orient": "top",
                 "scale": "x",
                 "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "labelPadding": 10,
@@ -348,24 +354,25 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
                 "titlePadding": 10,
                 "titleFontSize": 16,        // Set the font size
-                "titleFont": "'Inconsolata', sans-serif"
+                "titleFont": "'Inconsolata', sans-serif",
+                "offset": -89
             },
-            {
-                "orient": "top",
-                "scale": "xSets",
-                "labelAngle": -45,
-                "labels": false,
-                "labelOffset": 15,
-                "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
-                "labelPadding": 20,
-                "labelFontSize": 12,
-                "bandPosition": 0.5,
-                "ticks": false,
-                "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
-                "titlePadding": 10,
-                "titleFontSize": 16,        // Set the font size
-                "titleFont": "'Inconsolata', sans-serif"
-            },
+            // {
+            //     "orient": "top",
+            //     "scale": "xSets",
+            //     "labelAngle": -45,
+            //     "labels": false,
+            //     "labelOffset": 15,
+            //     "labelColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
+            //     "labelPadding": 20,
+            //     "labelFontSize": 12,
+            //     "bandPosition": 0.5,
+            //     "ticks": false,
+            //     "titleColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
+            //     "titlePadding": 10,
+            //     "titleFontSize": 16,        // Set the font size
+            //     "titleFont": "'Inconsolata', sans-serif"
+            // },
         ],
 
         "marks": [
@@ -394,7 +401,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "from": { "data": "setData" },
                 "encode": {
                     "enter": {
-                        "x": { "scale": "xSets", "field": "label", "offset": -5 },  // Removed band: true
+                        "x": { "scale": "xSets", "field": "label", "offset": 0 },  // Removed band: true
                         "width": { "scale": "xSets", "band": 1 },  // Auto-size bar width to band
                         "y": { "scale": "ySets", "field": "count" },  // Use 'count' for height
                         "y2": { "scale": "ySets", "value": 0 },  // Set y2 at the bottom
@@ -414,9 +421,9 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "from": { "data": "upsetData" },
                 "encode": {
                     "enter": {
-                        "x": { "scale": "xMatrix", "field": "x1" },
+                        "x": { "scale": "xMatrix", "field": "x1", "band": 0.5 },
                         "y": { "scale": "y", "field": "setLabel", "band": 0.5 },
-                        "x2": { "scale": "xMatrix", "field": "x2" },
+                        "x2": { "scale": "xMatrix", "field": "x2", "band": 0.5 },
                         "y2": { "scale": "y", "field": "setLabel", "band": 0.5 },
                         "stroke": { "value": filterPlotBarColors[theme] },
                         "strokeWidth": { "value": 1 },
@@ -435,7 +442,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "from": { "data": "matrixData" },
                 "encode": {
                     "enter": {
-                        "x": { "scale": "xMatrix", "field": "x", "offset": 0 },
+                        "x": { "scale": "xMatrix", "field": "x", "band": 0.5 },
                         "y": {
                             "scale": "y",
                             "field": "setLabel",
@@ -472,32 +479,51 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                     }
                 }
             },
-            {
-                "type": "text",
-                "from": { "data": "labelData" },
-                "encode": {
-                    "enter": {
-                        // "dx": { "signal": "width" }, // Use x scale for the end position
-                        "x": { "scale": "xSets", "field": "label" },
-                        "dx": { "value": 12 }, // Use x scale for the end position
-                        "y": { "scale": "y", "value": 90 }, // Position vertically based on setLabel
-                        "dy": { "value": 0 }, // Adjust dy to vertically center the text (can be modified)
-                        "fontSize": { "value": 12 },
-                        "angle": { "value": -45 },
-                        "text": { "field": "readableLabel" },
-                        "fill": { "value": `${getCSSVariableValue('--bp-theme-text-color', theme)}` },
-                        "font": { "value": "'Inconsolata', sans-serif" }
-                    },
-                    "update": {
-                        "fontWeight": {
-                            "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? 'bold': hoverData && hoverData.label === datum.label ? 'bold' : 'normal'`
-                        },
-                        "fontSize": {
-                            "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? 10: hoverData && hoverData.label === datum.label ? 10 : 10`
-                        },
-                    },
-                }
-            }
+            // {
+            //     "type": "text",
+            //     "from": { "data": "labelData" },
+            //     "encode": {
+            //         "enter": {
+            //             // "dx": { "signal": "width" }, // Use x scale for the end position
+            //             "x": { "scale": "xSets", "field": "label" },
+            //             "dx": { "value": 12 }, // Use x scale for the end position
+            //             "y": { "scale": "y", "value": 90 }, // Position vertically based on setLabel
+            //             "dy": { "value": 0 }, // Adjust dy to vertically center the text (can be modified)
+            //             "fontSize": { "value": 12 },
+            //             "angle": { "value": -45 },
+            //             "text": { "field": "readableLabel" },
+            //             "fill": { "value": `${getCSSVariableValue('--bp-theme-text-color', theme)}` },
+            //             "font": { "value": "'Inconsolata', sans-serif" }
+            //         },
+            //         "update": {
+            //             "fontWeight": {
+            //                 "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? 'bold': hoverData && hoverData.label === datum.label ? 'bold' : 'normal'`
+            //             },
+            //             "fontSize": {
+            //                 "signal": `hoverData && hoverData.setLabel && replace(hoverData.setLabel, datum.label, ' ') !== hoverData.setLabel ? 10: hoverData && hoverData.label === datum.label ? 10 : 10`
+            //             },
+            //         },
+            //     }
+            // },
+            // {
+            //     "type": "image",
+            //     "from": { "data": "labelData" },
+            //     "encode": {
+            //         "enter": {
+            //             "opacity": { "value": 1 },
+            //             "url": { "value": "http://localhost:3030/images/the-needle-drop.webp" },
+            //             "x": { "scale": "xSets", "field": "label", "offset": -5 },
+            //             "y": { "scale": "yText", "value": 0, "offset": 20 },
+            //             "baseline": { "value": "bottom" },
+            //             "strokeWidth": { "value": 2 },
+            //             "stroke": { "value": "black" },
+            //             // "dy": { "value": 20 },
+            //             "width": { "value": 30 },
+            //             "height": { "value": 30 },
+            //             "aspect": { "value": true }
+            //         }
+            //     }
+            // }
         ],
         "signals": [
             {
@@ -505,6 +531,10 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                 "value": null,
                 "on": [
                     { "events": "rect:mouseover", "update": "datum", "force": true },
+                    { "events": "symbol:mouseover", "update": "datum", "force": true },
+                    { "events": "rule:mouseover", "update": "datum", "force": true },
+
+
                     // { "events": "rect:mouseout", "update": "null", "force": true }
                 ]
             },
@@ -512,23 +542,117 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
     }
 
 
-    if ((Object.keys(selectedAlbumIds).length + Object.keys(selectedAlbumIdsRankings).length) === 1) return (
-        <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+    const SelectorIconComponent = () => {
+        return <>
+            <div className={styles.selectorIconContainer} style={{ height: `${paddingTop - 10}px` }}>
+                {Object.keys(groupList).map((key: string, index: number) => {
+                    //Total distance covered in this column
+                    const dist = (width - paddingRight - paddingLeft) * 0.3;
+                    //Total width of each bar without padding
+                    const bandWidth = dist / Object.keys(groupList).length
+
+                    const { pub_unique_name, type, bin } = parseLabel(key, publicationsSelected, upsetConsolidate);
+
+                    let contentDisplay = <div></div>;
+
+                    if (upsetConsolidate) {
+                        contentDisplay = <></>
+                    } else {
+                        if (type === 'review') {
+                            contentDisplay =
+                                <div className={styles.selectorIconBinDisplay}>
+                                    {bin?.split('-').map(entry => entry.includes('5') ? parseInt(entry) / 10 : Math.round(parseInt(entry) / 10)).join('-')}
+                                </div>
+                        } else {
+                            contentDisplay =
+                                <div className={styles.selectorIconRankingDisplay}>
+                                    #
+                                </div>
+                        }
+                    }
+                    return (
+                        <div
+                            key={key}
+                            className={styles.selectorIcon}
+                            style={{
+                                width: bandWidth,
+                                top: paddingTop - 50,
+                                left: paddingLeft + 10 + (bandWidth * index)
+                            }}
+                        >
+                            {contentDisplay}
+                            <img
+                                style={{ boxSizing: 'border-box' }}
+                                className='pub-icon'
+                                src={`/images/${pub_unique_name}.webp`}
+                                width={`${Math.min(30, bandWidth - 2)}px`}
+                                height={`${Math.min(30, bandWidth - 2)}px`}
+                            />
+
+                        </div>
+
+                    )
+                })}
+            </div>
+
+        </>
+
+    }
+
+    if (Object.keys(groupList).length === 1) return (
+        <div className={styles.minSelectorsContainer}>
             The UpSet Plot filtering requires at least 2 selections.
-            <Link href="/dashboard"><Button style={{ marginTop: '20px' }} label="Go To Dashboard" /></Link>
+            <Link href="/dashboard">
+                <Button style={{ marginTop: '20px' }} label="Go To Dashboard" />
+            </Link>
         </div>
     )
 
+    const ConsolidateIcon = () => {
+        if (upsetConsolidate) return (
+            <Tooltip content='Separate Groups' size='sm'>
+                <Icon icon='bi bi-collection-fill' size='xs' onClick={toggleConsolidate} />
+            </Tooltip>)
+
+        return (
+            <Tooltip content='Consolidate Groups' size='sm'>
+                <Icon icon='bi bi-collection' size='xs' onClick={toggleConsolidate} />
+            </Tooltip>
+        )
+    }
+
+    const InclusiveIcon = () => {
+        if (upsetInclusive) return (
+            <Tooltip content='Use Exclusive Groups' size='sm'>
+                <Icon icon='bi bi-box-fill' size='xs' onClick={toggleInclusive} />
+            </Tooltip>)
+
+        return (
+            <Tooltip content='Use Inclusive Groups' size='sm'>
+                <Icon icon='bi bi-box' size='xs' onClick={toggleInclusive} />
+            </Tooltip>
+        )
+    }
+
+
+
     return (
         <>
-            <Icon icon='bi bi-question-circle' onClick={toggleModal} style={{ zIndex: 5, position: 'absolute', top: 5, right: 5 }} size='xs' />
-            <Vega
-                spec={spec}
-                actions={false}
-                signalListeners={signalListeners}
-            />
+            <div className={styles.optionsContainer}>
+                <InclusiveIcon />
+                <ConsolidateIcon />
+                <Icon icon='bi bi-question-circle' onClick={toggleModal} size='xs' />
+            </div>
+            <SelectorIconComponent />
+            <Scrollable width="100%" height="calc(100vh - 160px)">
+                <Vega
+                    spec={spec}
+                    actions={false}
+                    signalListeners={signalListeners}
+                />
+            </Scrollable>
             <Modal
-                style={{ maxWidth: '500px' }}
+                style={{ maxWidth: '700px' }}
                 opened={modalOpened}
                 setOpened={setModalOpened}
                 closeOnOutside

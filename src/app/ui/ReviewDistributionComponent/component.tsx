@@ -58,7 +58,12 @@ const ReviewDistributionComponent = ({ combineYears }: ReviewDistributionCompone
             <div key={publication.id} className={styles.chartContainer}>
                 <div>
                     <div className={styles.header}>
-                        <Icon icon="bi bi-house" />
+                        <img
+                            className='pub-icon'
+                            src={`/images/${publication.unique_name}.webp`}
+                            width="30px"
+                            height="30px"
+                        />
                         <div className={styles.publicationName}>
                             {publication.name}
                         </div>

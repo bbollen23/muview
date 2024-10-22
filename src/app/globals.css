@@ -34,8 +34,13 @@ a {
     border-radius: 10px;
     width: max-content;
     background-color: #2dd4bf;
-    color: hsl(var(--gray-900));
+    color: hsl(var(--gray-100));
     box-sizing: border-box;
+}
+
+.pub-icon {
+    border: 2px solid black;
+    border-radius: 20px
 }
 
 
