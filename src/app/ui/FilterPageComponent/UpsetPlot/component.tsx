@@ -541,6 +541,31 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
         ]
     }
 
+    const ConsolidateIcon = () => {
+        if (upsetConsolidate) return (
+            <Tooltip content='Separate Groups' size='sm'>
+                <Icon icon='bi bi-collection-fill' size='xs' onClick={toggleConsolidate} />
+            </Tooltip>)
+
+        return (
+            <Tooltip content='Consolidate Groups' size='sm'>
+                <Icon icon='bi bi-collection' size='xs' onClick={toggleConsolidate} />
+            </Tooltip>
+        )
+    }
+
+    const InclusiveIcon = () => {
+        if (upsetInclusive) return (
+            <Tooltip content='Use Exclusive Groups' size='sm'>
+                <Icon icon='bi bi-box-fill' size='xs' onClick={toggleInclusive} />
+            </Tooltip>)
+
+        return (
+            <Tooltip content='Use Inclusive Groups' size='sm'>
+                <Icon icon='bi bi-box' size='xs' onClick={toggleInclusive} />
+            </Tooltip>
+        )
+    }
 
     const SelectorIconComponent = () => {
         return <>
@@ -576,7 +601,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                             className={styles.selectorIcon}
                             style={{
                                 width: bandWidth,
-                                top: paddingTop - 50,
+                                top: paddingTop - 40,
                                 left: paddingLeft + 10 + (bandWidth * index)
                             }}
                         >
@@ -607,33 +632,6 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
             </Link>
         </div>
     )
-
-    const ConsolidateIcon = () => {
-        if (upsetConsolidate) return (
-            <Tooltip content='Separate Groups' size='sm'>
-                <Icon icon='bi bi-collection-fill' size='xs' onClick={toggleConsolidate} />
-            </Tooltip>)
-
-        return (
-            <Tooltip content='Consolidate Groups' size='sm'>
-                <Icon icon='bi bi-collection' size='xs' onClick={toggleConsolidate} />
-            </Tooltip>
-        )
-    }
-
-    const InclusiveIcon = () => {
-        if (upsetInclusive) return (
-            <Tooltip content='Use Exclusive Groups' size='sm'>
-                <Icon icon='bi bi-box-fill' size='xs' onClick={toggleInclusive} />
-            </Tooltip>)
-
-        return (
-            <Tooltip content='Use Inclusive Groups' size='sm'>
-                <Icon icon='bi bi-box' size='xs' onClick={toggleInclusive} />
-            </Tooltip>
-        )
-    }
-
 
 
     return (

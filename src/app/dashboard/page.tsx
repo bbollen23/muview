@@ -41,16 +41,30 @@ function Dashboard({ }) {
     )
   }
 
+  const EmptyYearsComponent = () => {
+    return (
+      <div className={styles.emptyPublicationsContainer}>
+        <div>There are no years selected. Try adding a 'Review Year' in the upper left.</div>
+      </div>
+    )
+  }
+
+
   let tabsData: TabData[] = [];
-  if (publicationsSelected.length > 0) {
+  if (publicationsSelected.length > 0 && selectedYears.length > 0) {
     tabsData = [
       { label: 'Album Distributions', 'content': <ReviewDistributionComponent combineYears={combineYearsDashboard} /> },
       { label: 'Year End Lists', 'content': <YearEndComponent combineYears={combineYearsDashboard} /> }
     ]
-  } else {
+  } else if (selectedYears.length > 0) {
     tabsData = [
       { label: 'Album Distributions', 'content': <EmptyPublicationsComponent /> },
       { label: 'Year End Lists', 'content': <EmptyPublicationsComponent /> }
+    ]
+  } else {
+    tabsData = [
+      { label: 'Album Distributions', 'content': <EmptyYearsComponent /> },
+      { label: 'Year End Lists', 'content': <EmptyYearsComponent /> }
     ]
   }
 

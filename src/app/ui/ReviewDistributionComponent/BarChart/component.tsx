@@ -64,7 +64,6 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
     const [clickedData, setClickedData] = useState<BarData[]>([]);
 
     const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&years=${years}`, fetcher)
-    console.log(data);
 
     // Generate step size for particular publication
     let stepSize = 5;
@@ -114,9 +113,12 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
         // Handle initializing clicked bar marks when navigating back to page
 
         const allYears = years.every((year) => year in selectedAlbumIds && publication_id in selectedAlbumIds[year])
-        if (!(allYears)) {
-            return
-        }
+        if (!(allYears)) return
+
+        // No years selected, return
+        if (years.length === 0) return
+
+        // Iterates through each year for the given pubId to see what bins are in every year.
         const barsSelected: BarData[] = [];
         const trackedBins = Object.keys(selectedAlbumIds[years[0]][publication_id]);
         for (let i = 1; i < years.length; i++) {
@@ -125,7 +127,9 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
             // Remove anything from trackedBins that isn't in the current set of bins.
             trackedBins.filter((trackedBin) => bins.includes(trackedBin));
         }
+        console.log(trackedBins)
 
+        // For each bin that is in every year
         trackedBins.forEach(trackedBin => {
             const bins = trackedBin.split(',').map(Number);
             let total = 0;

@@ -81,6 +81,8 @@
 
 .reviewSection {
     margin-top: 20px;
+    padding-top: 20px;
+    margin-bottom: 40px;
     border-top: 1px solid var(--bp-theme-border-color);
     display: flex;
     flex-direction: row;
@@ -117,4 +119,31 @@
     flex: 1;
     flex-direction: column;
     padding-bottom: 5px;
+}
+
+
+.albumToolTipSmall {
+    background-color: var(--bp-theme-tooltip-color);
+    color: var(--bp-theme-tooltip-text-color);
+    position: absolute;
+    // width: 40px;
+    // height: 200px;
+    border-radius: 2px;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: -4px 4px 4px hsl(var(--gray-900));
+    padding: 10px;
+    flex-direction: column;
+    display: flex;
+    transition: opacity 1s ease;
+    opacity: 0;
+    border: 2px solid black;
+
+    // border: 1px solid var(--bp-theme-card-border-color);
+    // color: var(--bp-theme-text-color);
+}
+
+.visible {
+    opacity: 1;
+    transition: opacity 1s ease;
 }

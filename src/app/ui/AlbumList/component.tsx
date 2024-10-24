@@ -1,9 +1,9 @@
 'use client'
 import styles from "./component.module.scss";
-import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown } from "@bbollen23/brutal-paper";
+import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown, Modal, Button, ModalHeader, ModalContent } from "@bbollen23/brutal-paper";
 import { type DataStore } from '@/stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "@/app/lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore, Publication } from "@/app/lib/definitions";
 import { useRef, useEffect, useState } from "react";
 import AlbumComponent from "@/app/ui/AlbumList/Album";
 import useSWR from "swr";
@@ -43,6 +43,13 @@ const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings:
     return Array.from(uniqueIdSet); // Return unique items as an array
 };
 
+interface SelectedAlbumInfo {
+    album: AlbumWithScore,
+    reviews: Review[],
+    rankings: Ranking[],
+    avgScore: number,
+}
+
 const AlbumList = () => {
     const { notify } = useNotification();
 
@@ -50,6 +57,8 @@ const AlbumList = () => {
     const selectedAlbumIds = useDataStore((state: DataStore) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state: DataStore) => state.selectedAlbumIdsRankings)
     const selectedFilters = useDataStore((state: DataStore) => state.selectedFilters);
+    const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected);
+    const chartColorScheme = useDataStore((state: DataStore) => state.chartColorScheme);
 
     const reviews = useDataStore((state: DataStore) => state.reviews);
     const rankings = useDataStore((state: DataStore) => state.rankings);
@@ -57,10 +66,7 @@ const AlbumList = () => {
 
     const flatAlbumIds = selectedFilters.length === 0 ? getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings) :
         getAlbumIdsFromFilters(selectedFilters);
-    // const flatAlbumIds = getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings);
 
-    // console.log(getAlbumIdsFromFilters(selectedFilters))
-    // console.log(getUniqueList(selectedAlbumIds, selectedAlbumIdsRankings))
 
 
     const { data, isLoading } = useSWR(
@@ -109,6 +115,8 @@ const AlbumList = () => {
     const [totalAlbums, setTotalAlbums] = useState<Album[]>([]);
 
     const [sortBy, setSortBy] = useState<string | null>(null)
+    const [selectedAlbumInfo, setSelectedAlbumInfo] = useState<SelectedAlbumInfo | null>(null);
+
     // const albumList: Album[] = totalAlbums.filter((entry: Album) => entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) || entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase()))
 
     const albumList: AlbumWithScore[] = totalAlbums
@@ -197,6 +205,28 @@ const AlbumList = () => {
     };
 
 
+    const [modalOpened, setModalOpened] = useState<boolean>(false);
+
+
+    const toggleModal = () => {
+        setModalOpened((prev) => !prev);
+    }
+
+    const handleAlbumClick = (album: AlbumWithScore, reviews: Review[], rankings: Ranking[], avgScore: number) => {
+        setSelectedAlbumInfo({
+            album,
+            reviews,
+            rankings,
+            avgScore
+        })
+        toggleModal();
+    }
+
+    const handleCloseModal = () => {
+        setSelectedAlbumInfo(null);
+    }
+
+
 
 
     return (
@@ -227,20 +257,76 @@ const AlbumList = () => {
                     <div>Selected Avg Score</div>
                 </div>
             </div>
-            <Scrollable width='100%' height='calc(100vh - 320px)'>
+            <Scrollable width='100%' height='calc(100vh - 340px)'>
                 {isLoading ?
                     <div className={styles.loadingAlbumsContainer}>
                         <div style={{ fontSize: '1.2rem' }}>Loading</div><LoadingIcon visible={true} />
                     </div>
                     : sortedAlbumList.map((album: AlbumWithScore) => {
+                        const rankings = getRankings(album)
                         return (
                             // <div></div>
-                            <AlbumComponent avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={getRankings(album)} />
+                            <AlbumComponent onClick={() => handleAlbumClick(album, album.reviews, rankings, album.avg_score)} avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={rankings} />
                         )
                     })
                 }
             </Scrollable>
-
+            <Modal
+                style={{ width: '700px' }}
+                opened={modalOpened}
+                setOpened={setModalOpened}
+                onClose={handleCloseModal}
+                closeOnOutside
+                actions={
+                    <>
+                        <Button flat label='Close' onClick={toggleModal} />
+                    </>
+                }>                <ModalHeader
+                    closeButton={true}
+                    title={selectedAlbumInfo?.album.album_title}
+                />
+                <ModalContent style={{ marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                {selectedAlbumInfo?.album.album_title}
+                            </div>
+                            <div style={{ fontSize: '1.2rem' }}>
+                                {selectedAlbumInfo?.album.artists.join(', ')}
+                            </div>
+                            <div style={{ marginTop: '20px' }}>
+                                <b>Genres:</b> {selectedAlbumInfo?.album.genres.join(', ')}
+                            </div>
+                            <div>
+                                <b>Subgenres:</b> {selectedAlbumInfo?.album.subgenres.join(', ')}
+                            </div>
+                            <div>
+                                <b>Release Date:</b> {selectedAlbumInfo ? new Date(selectedAlbumInfo.album.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                            </div>
+                        </div>
+                        <div className={styles.img} style={{ width: '100px', minWidth: '100px', height: '100px', fontSize: '1.0rem' }}>
+                            No Image Available
+                        </div>
+                    </div>
+                    <div className={styles.reviewSection}>
+                        {selectedAlbumInfo?.reviews.map((review: Review) => (
+                            <div key={`${review.id}`} className={styles.review}>
+                                <div className={styles.publicationName}>
+                                    {<div>{publicationsSelected.filter((publication: Publication) => review.publication_id === publication.id)[0].name}</div>}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'row', gap: "10px" }}>
+                                    <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
+                                        {review.score}
+                                    </div>
+                                    {selectedAlbumInfo?.rankings.find((entry: Ranking) => entry.publication_id == review.publication_id) ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
+                                        #{selectedAlbumInfo?.rankings.find((entry: Ranking) => entry.publication_id == review.publication_id)?.rank}
+                                    </div> : null}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

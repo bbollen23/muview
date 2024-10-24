@@ -31,23 +31,27 @@
     flex-direction: column;
     box-sizing: border-box;
     position: absolute;
-    height: 50px;
     z-index: 5;
+}
+
+
+.selectorIconBinDisplay {
+    transform: rotate(-45deg);
+    font-size: 0.7rem;
+}
+
+.selectorIconBinDisplay,
+.selectorIconRankingDisplay {
+    text-align: center;
+    margin-bottom: 4px;
+    top: -20px;
+    position: absolute;
+    width: max-content;
 }
 
 .selectorIconBinDisplay {
     transform: rotate(-45deg);
-    position: absolute;
-    left: 15.5px;
-    top: -12px;
-    text-align: center;
     font-size: 0.7rem;
-    width: max-content;
-}
-
-.selectorIconRankingDisplay {
-    text-align: center;
-    margin-bottom: 4px;
 }
 
 .optionsContainer {
