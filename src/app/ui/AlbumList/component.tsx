@@ -237,7 +237,7 @@ const AlbumList = () => {
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     {data && data.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <b>Showing 0/0 Albums</b>}
                     <div style={{ display: 'flex' }}>
-                        <Tooltip size="sm" content='Sort By'>
+                        <Tooltip size="sm" timeoutLength={1000} content='Sort By'>
                             <IconDropdown
                                 dropDownList={['Avg. Score', 'Release Date', 'Title', 'Artist']} size="sm"
                                 icon='bi bi-funnel'

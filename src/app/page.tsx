@@ -37,7 +37,7 @@ export default function Home() {
             </div>
             <div className={styles.actionRow}>
               <Link href="/about"><Button label="About MuView" /></Link>
-              <Link href="/dashboard"><Button label="Go To Dashboard" /></Link>
+              <Link href="/dashboard"><Button label="Go To Dashboard" iconRight="bi bi-arrow-right" /></Link>
             </div>
           </div>
         </div>

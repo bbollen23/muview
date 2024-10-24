@@ -669,7 +669,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                             </p>
                             <p>Whenever you select a bar in one of the distributions or make a brush selection in the year-end rankings, you will see a respective &quot;selector&quot; in the UpSet plot. The matrix to the left of the bar chart indicates the selectors which are being intersected and the bar chart indicates how many albums are exclusive to that intersection.</p>
                             <p>The bar chart at the top indicates the sizes of the individual selectors you have chosen.</p>
-                            <p>When hovering over any of the bars, you&aspos;ll see the &quot;Current Hovered Data&quot; section reflect the dataset that you are hovering over. When you add your very first filter, the Albums List to the right will only include albums within the dataset you selected. All additional upset plot filters will be unioned with the existing album list. This means you can find albums that have specific scores on multiple publications instead.</p>
+                            <p>When hovering over any of the bars, you&apos;ll see the &quot;Current Hovered Data&quot; section reflect the dataset that you are hovering over. When you add your very first filter, the Albums List to the right will only include albums within the dataset you selected. All additional upset plot filters will be unioned with the existing album list. This means you can find albums that have specific scores on multiple publications instead.</p>
                         </div>
                     </div>
                 </ModalContent>

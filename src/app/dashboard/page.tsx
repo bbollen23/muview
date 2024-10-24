@@ -36,7 +36,7 @@ function Dashboard({ }) {
     return (
       <div className={styles.emptyPublicationsContainer}>
         <div>There are no publications selected.</div>
-        <Link href='dashboard/publications'><Button label="Go To Publications"></Button></Link>
+        <Link href='dashboard/publications'><Button label="Go To Publications" iconRight='bi bi-arrow-right'></Button></Link>
       </div>
     )
   }
@@ -44,7 +44,7 @@ function Dashboard({ }) {
   const EmptyYearsComponent = () => {
     return (
       <div className={styles.emptyPublicationsContainer}>
-        <div>There are no years selected. Try adding a 'Review Year' in the upper left.</div>
+        <div>There are no years selected. Try adding a &apos;Review Year&apos; in the upper left.</div>
       </div>
     )
   }
@@ -96,7 +96,7 @@ function Dashboard({ }) {
         </div>
         <div>
           <CombineYearsComponent />
-          <Tooltip size="sm" content="Setting"><Icon size="sm" icon='bi bi-gear' /></Tooltip>
+          <Tooltip size="sm" content="Settings"><Icon size="sm" icon='bi bi-gear' /></Tooltip>
         </div>
       </div>
       <Tabs tabData={tabsData}>

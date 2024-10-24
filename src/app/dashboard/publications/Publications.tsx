@@ -55,6 +55,7 @@ export default function Publications({ publications }: PublicationProps) {
                 size="sm"
                 actions={
                     <Button
+                        disabled={add && publicationSelected(publication)}
                         flat
                         label={add ? 'Add Publication' : 'Remove Publication'}
                         onClick={add ? () => handleAddPublication(publication) : () => handleRemovePublication(publication)}

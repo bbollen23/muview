@@ -5,8 +5,6 @@ import type { Album, Review, Publication, Ranking } from '@/app/lib/definitions'
 import { useDataStore } from "@/providers/data-store-provider";
 import { type DataStore } from '@/stores/data-store'
 import clsx from 'clsx';
-import { useTheme } from '@/providers/theme-provider';
-import { Modal, Button, ModalHeader, ModalContent } from '@bbollen23/brutal-paper';
 
 interface Position {
     left: number;
@@ -23,18 +21,10 @@ interface AlbumComponentProps {
 
 
 const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumComponentProps): JSX.Element => {
-    const { theme } = useTheme();
     const [visible, setVisible] = useState(false);
     const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
     const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state: DataStore) => state.chartColorScheme)
-
-    const [modalOpened, setModalOpened] = useState<boolean>(false);
-
-
-    const toggleModal = () => {
-        setModalOpened((prev) => !prev);
-    }
 
     const handleMouseOver = (event: React.MouseEvent<HTMLDivElement>) => {
         const targetElement = event.currentTarget;
@@ -132,7 +122,7 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
                     const currPublication = publicationsSelected.find((publication: Publication) => review.publication_id === publication.id);
                     const pubIndex = publicationsSelected.findIndex(item => item.id === currPublication?.id);
                     return (
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center', justifyContent: 'flex-start', margin: '5px 0px' }}>
+                        <div key={`tooltip-${review.id}`} style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center', justifyContent: 'flex-start', margin: '5px 0px' }}>
                             <img
                                 className='pub-icon'
                                 src={`/images/${currPublication?.unique_name}.webp`}
