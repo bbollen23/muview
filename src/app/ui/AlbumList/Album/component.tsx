@@ -36,8 +36,6 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
         // x = 2, y = 88px x = 3 132px means y = 44x
 
         const viewportHeight = window.innerHeight;
-        console.log(targetRect.height)
-        console.log(targetRect);
 
         const val = ((reviews.length * 44) - 52) / 2
         const positionLeft = targetRect.width + 40;

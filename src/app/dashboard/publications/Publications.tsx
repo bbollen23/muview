@@ -45,7 +45,6 @@ export default function Publications({ publications }: PublicationProps) {
         add: boolean
     }
     const PublicationCard = ({ publication, add }: PublicationCardProps) => {
-        console.log(publication.unique_name);
         return (
             <Card
                 title={<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img className='pub-icon' src={`/images/${publication.unique_name}.webp`} width="30px" height="30px" />

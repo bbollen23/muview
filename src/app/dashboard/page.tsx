@@ -4,7 +4,7 @@ import { Tabs, Button, SwitchGroup, Icon, Tooltip } from "@bbollen23/brutal-pape
 import Link from 'next/link';
 import { useDataStore } from "@/providers/data-store-provider";
 import { useState } from "react";
-import { ReviewDistributionComponent, YearEndComponent } from "@/app/ui";
+import { DashboardComponent } from "@/app/ui";
 
 interface TabData {
   label: string,
@@ -53,8 +53,8 @@ function Dashboard({ }) {
   let tabsData: TabData[] = [];
   if (publicationsSelected.length > 0 && selectedYears.length > 0) {
     tabsData = [
-      { label: 'Album Distributions', 'content': <ReviewDistributionComponent combineYears={combineYearsDashboard} /> },
-      { label: 'Year End Lists', 'content': <YearEndComponent combineYears={combineYearsDashboard} /> }
+      { label: 'Album Distributions', 'content': <DashboardComponent key={'barChartTab'} type={'barChart'} combineYears={combineYearsDashboard} /> },
+      { label: 'Year End Lists', 'content': <DashboardComponent key={'scatterPlotTab'} type={'scatterPlot'} combineYears={combineYearsDashboard} /> }
     ]
   } else if (selectedYears.length > 0) {
     tabsData = [
@@ -96,7 +96,7 @@ function Dashboard({ }) {
         </div>
         <div>
           <CombineYearsComponent />
-          <Tooltip size="sm" content="Settings"><Icon size="sm" icon='bi bi-gear' /></Tooltip>
+          {/* <Tooltip size="sm" content="Settings"><Icon size="sm" icon='bi bi-gear' /></Tooltip> */}
         </div>
       </div>
       <Tabs tabData={tabsData}>

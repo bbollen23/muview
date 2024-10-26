@@ -122,7 +122,6 @@ const generateUpsetDataExclusive = (groupList: Record<string, number[]>, inclusi
         let intersectingElements = calculateIntersection(sets);
 
         // Remove any elements already accounted for in larger intersections
-        console.log('here')
         if (!inclusive) {
             intersectingElements = intersectingElements.filter(item => !accountedElements.has(item));
         }

@@ -28,6 +28,18 @@ export type AlbumIdsSelectedRanking = Record<number, Record<number, number[]>>;
 export type CurrentReviews = Record<number, Record<number, Review[]>>;
 export type CurrentRankings = Record<number, Record<number, Ranking[]>>;
 
+
+export interface BarChartMetadata {
+    stepSize: number,
+    name?: string,
+    years?: number[]
+}
+
+// Houses metadata for each bar chart, segmented by year then pub id
+export type CurrentBarChartMetadata = Record<number, Record<number, BarChartMetadata>>;
+
+
+
 export type FilterType = 'upset-filter' | 'upset-set-filter' | 'genre-filter';
 
 export interface Filter {
@@ -38,6 +50,7 @@ export interface Filter {
 }
 
 export interface Album {
+    [key: string]: string | number | null | string[] | undefined | Review[]; // Adjust types to match your data
     id: number,
     album_title: string,
     artists: string[],

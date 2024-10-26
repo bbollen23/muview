@@ -9,6 +9,7 @@ import AlbumComponent from "@/app/ui/AlbumList/Album";
 import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
 import { getAlbumIdsFromFilters } from "@/app/lib/filterAlbums";
+import { downloadCsv } from "@/app/lib/downloadCsv";
 
 
 const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings: AlbumIdsSelectedRanking): number[] => {
@@ -226,6 +227,13 @@ const AlbumList = () => {
         setSelectedAlbumInfo(null);
     }
 
+    const handleDownloadCsv = () => {
+        notify({
+            "message": `Downloading information for ${sortedAlbumList.length} albums`,
+            "type": "info"
+        })
+        downloadCsv(sortedAlbumList, publicationsSelected);
+    }
 
 
 
@@ -244,11 +252,11 @@ const AlbumList = () => {
                                 onChange={handleOnSortByChange}
                             />
                         </Tooltip>
-                        <Tooltip size="sm" content='Clear albums'>
+                        {/* <Tooltip size="sm" content='Clear albums'>
                             <Icon icon='bi bi-trash' size='sm' />
-                        </Tooltip>
+                        </Tooltip> */}
                         <Tooltip size="sm" content='Download as CSV'>
-                            <Icon icon='bi bi-download' size='sm' />
+                            <Icon icon='bi bi-download' size='sm' onClick={handleDownloadCsv} />
                         </Tooltip>
                     </div>
                 </div>

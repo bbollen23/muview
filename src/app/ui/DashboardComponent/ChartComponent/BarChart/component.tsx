@@ -11,7 +11,8 @@ import { fetcher } from '@/app/lib/fetcher';
 
 interface BarChartProps {
     publication_id: number,
-    years: number[]
+    years: number[],
+    // setStepSize: (step: number) => void;
 }
 
 interface BarData {
@@ -56,46 +57,22 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
     const addReviews = useDataStore((state => state.addReviews))
     const clickBarSelection = useDataStore((state) => state.clickBarSelection);
     const selectedAlbumIds = useDataStore((state) => state.selectedAlbumIds);
+    const initializeBarChart = useDataStore((state) => state.initializeBarChart);
 
 
     const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
 
     // Generate state for tracking marks for clicked bars
     const [clickedData, setClickedData] = useState<BarData[]>([]);
+    const [stepSize, setStepSize] = useState<number>(5);
 
     const { data, error, isLoading } = useSWR(`/api/reviews?publication_ids=${[publication_id]}&years=${years}`, fetcher)
 
     // Generate step size for particular publication
-    let stepSize = 5;
-    if (data) {
-        stepSize = Math.max(smallestScoreDifference(data.newReviews), 5);
-        console.log(stepSize);
-        if (isNaN(stepSize) || !Number.isFinite(stepSize)) {
-            stepSize = 5;
-        }
-    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleClickData = (name: string, value: any) => {
-
-        setClickedData((prev: BarData[]) => {
-            let updatedState = [...prev];
-
-            // Remove selection if all
-
-            const allSelected = years.every((year) => selectedAlbumIds[year] && selectedAlbumIds[year][publication_id] && selectedAlbumIds[year][publication_id][`${value.bin0},${value.bin1}`])
-
-            if (allSelected) {
-                updatedState = prev.filter((entry: BarData) => entry.bin0 !== value.bin0)
-                // Add all
-            } else if (!updatedState.some(entry => entry.bin0 === value.bin0 && entry.bin1 === value.bin1)) {
-                updatedState.push({ 'bin0': value.bin0, 'bin1': value.bin1, 'count': value.count })
-            }
-
-            clickBarSelection(value.bin0, value.bin1, publication_id, years);
-
-            return updatedState;
-        })
+        clickBarSelection(value.bin0, value.bin1, publication_id, years);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
@@ -107,37 +84,57 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
         "clickData": handleClickData, "hoverData": handleHoverData
     };
 
+    useEffect(() => {
+        // Re-check stepSize. Not necessary, but shouldn't be based on render.
+        if (data) {
+            let tempStepSize = Math.max(smallestScoreDifference(data.newReviews), 5);
+            if (isNaN(stepSize) || !Number.isFinite(stepSize)) {
+                tempStepSize = 5;
+            }
+            setStepSize(tempStepSize)
+        }
+    }, [data])
 
     useEffect(() => {
+        // If stepSize changes, re-initialize metadata
+        initializeBarChart(publication_id, years, stepSize);
+    }, [stepSize])
 
-        // Handle initializing clicked bar marks when navigating back to page
 
-        const allYears = years.every((year) => year in selectedAlbumIds && publication_id in selectedAlbumIds[year])
-        if (!(allYears)) return
+    useEffect(() => {
+        // This should first check if it's already initialized probably, but works.
+
+        // Handles rendering clicked data vis given the set of selectedAlbumIds
 
         // No years selected, return
         if (years.length === 0) return
 
-        // Iterates through each year for the given pubId to see what bins are in every year.
         const barsSelected: BarData[] = [];
-        const trackedBins = Object.keys(selectedAlbumIds[years[0]][publication_id]);
+
+        // Checks if all years given (could be single year) have associated data. If no data exists for a given year, set clickedData to Empty
+        const allYears = years.every((year) => year in selectedAlbumIds && publication_id in selectedAlbumIds[year])
+        if (!(allYears)) {
+            setClickedData(barsSelected);
+            return
+        }
+
+        // Iterates through each year for the given pubId to see what bins are in every year.
+        // For single year charts, just uses current year.
+        let trackedBins = Object.keys(selectedAlbumIds[years[0]][publication_id]);
         for (let i = 1; i < years.length; i++) {
             const year = years[i];
             const bins = Object.keys(selectedAlbumIds[year][publication_id]);
             // Remove anything from trackedBins that isn't in the current set of bins.
-            trackedBins.filter((trackedBin) => bins.includes(trackedBin));
+            trackedBins = trackedBins.filter((trackedBin) => bins.includes(trackedBin));
         }
-        console.log(trackedBins)
 
-        // For each bin that is in every year
+        // For each bin that is in every year (or the current year if not combined)
         trackedBins.forEach(trackedBin => {
             const bins = trackedBin.split(',').map(Number);
             let total = 0;
             years.forEach(year => {
-                console.log(total);
                 total = total + selectedAlbumIds[year][publication_id][trackedBin].length;
             })
-            // const total = years.reduce((sum, year) => sum + (selectedAlbumIds[year][publication_id][trackedBin]?.length || 0), 0);
             barsSelected.push({
                 "bin0": bins[0],
                 "bin1": bins[1],
@@ -146,7 +143,7 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
         })
         setClickedData(barsSelected)
 
-    }, [])
+    }, [selectedAlbumIds])
 
     useEffect(() => {
         if (data) {

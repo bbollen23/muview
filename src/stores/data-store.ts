@@ -1,5 +1,7 @@
 import { createStore } from 'zustand/vanilla'
-import type { Filter, Publication, Review, Ranking, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking } from '@/app/lib/definitions';
+import type { Filter, Publication, Review, Ranking, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking, CurrentBarChartMetadata } from '@/app/lib/definitions';
+
+
 
 
 export type DataStoreState = {
@@ -14,6 +16,7 @@ export type DataStoreState = {
     selectedFilters: Filter[];
     upsetConsolidate: boolean;
     upsetInclusive: boolean;
+    barChartMetadata: CurrentBarChartMetadata;
 
     // Coloring
     chartColorScheme: string[];
@@ -27,10 +30,14 @@ export type DataStoreState = {
 }
 
 
+
 export type DataStoreActions = {
     addPublication: (publication: Publication) => void;
     removePublication: (publication: Publication) => void;
+    initializeBarChart: (publication_id: number, years: number[], stepSize: number) => void;
     clickBarSelection: (bin0: number, bin1: number, publication_id: number, years: number[]) => void;
+    clearBarSelection: (publication_id: number, years: number[]) => void;
+    selectAllBarSelection: (publication_id: number, years: number[]) => void;
     brushSelection: (x1: number, x2: number, y1: number, y2: number, years: number[], publication_id: number) => void;
     addReviews: (reviews: Review[], years: number[]) => void;
     addRankings: (rankings: Ranking[], years: number[]) => void;
@@ -71,6 +78,7 @@ export const defaultInitialState: DataStoreState = {
     filterPlotBarColors: {},
     upsetConsolidate: false,
     upsetInclusive: false,
+    barChartMetadata: {}
 }
 
 export const initDataStore = (): DataStoreState => {
@@ -102,7 +110,8 @@ export const initDataStore = (): DataStoreState => {
             "dark": '#60a5fa'
         },
         upsetConsolidate: false,
-        upsetInclusive: false
+        upsetInclusive: false,
+        barChartMetadata: {}
 
     }
 }
@@ -113,15 +122,12 @@ export const createDataStore = (
     return createStore<DataStore>()((set) => ({
         ...initState,
         toggleConsolidate: () => {
-            console.log('toggled!')
             set((state) => ({
                 upsetConsolidate: !state.upsetConsolidate
             }))
         },
         toggleInclusive: () => {
-            console.log('toggled inclusive')
             set((state) => {
-                console.log(state.upsetInclusive);
                 return {
                     upsetInclusive: !state.upsetInclusive
                 }
@@ -263,6 +269,27 @@ export const createDataStore = (
                 selectedYears: years.map(Number)
             }))
         },
+        initializeBarChart: (publication_id: number, years: number[], stepSize: number) => {
+            set((state) => {
+                const updatedBarChartMetadata = { ...state.barChartMetadata }
+                years.forEach(year => {
+                    if (!updatedBarChartMetadata[year]) {
+                        updatedBarChartMetadata[year] = {
+                            [publication_id]: {
+                                stepSize
+                            }
+                        }
+                    } else if (!updatedBarChartMetadata[year][publication_id]) {
+                        updatedBarChartMetadata[year][publication_id] = { stepSize }
+                    } else {
+                        updatedBarChartMetadata[year][publication_id].stepSize = stepSize;
+                    }
+                })
+                return {
+                    barChartMetadata: updatedBarChartMetadata
+                }
+            })
+        },
         clickBarSelection: (bin0: number, bin1: number, publication_id: number, years: number[]) => {
             set((state) => {
 
@@ -278,7 +305,6 @@ export const createDataStore = (
                 } else {
                     years.forEach((year) => {
 
-                        // What happens if no year, pubId? Not possible don't think. Always there
                         const tempAlbumIds = [...state.reviews[year][publication_id]].filter((review: Review) => review.score >= bin0 && (bin1 === 100 ? review.score <= bin1 : review.score < bin1)).map((entry: Review) => entry.album_id)
 
                         // Initialize records if none exist
@@ -298,6 +324,50 @@ export const createDataStore = (
                     selectedAlbumIds: updatedAlbumIds
                 }
 
+            })
+        },
+        clearBarSelection: (publication_id: number, years: number[]) => {
+            set((state) => {
+                const updatedAlbumIds: AlbumIdsSelected = { ...state.selectedAlbumIds };
+                years.forEach((year) => {
+                    if (updatedAlbumIds[year] && updatedAlbumIds[year][publication_id]) {
+                        delete updatedAlbumIds[year][publication_id];
+                    }
+
+                })
+                return {
+                    selectedAlbumIds: updatedAlbumIds
+                }
+            })
+        },
+        selectAllBarSelection: (publication_id: number, years: number[]) => {
+            set((state) => {
+                const updatedAlbumIds: AlbumIdsSelected = { ...state.selectedAlbumIds };
+                years.forEach((year) => {
+                    const stepSize = state.barChartMetadata[year][publication_id].stepSize;
+                    if (!updatedAlbumIds[year]) {
+                        updatedAlbumIds[year] = { [publication_id]: {} }
+                    } else if (!updatedAlbumIds[year][publication_id]) {
+                        updatedAlbumIds[year][publication_id] = {};
+                    }
+                    // Generate bins
+                    const bins = [];
+                    for (let i = 0; i < 100; i += stepSize) {
+                        bins.push(`${i},${i + stepSize}`);
+                    }
+
+                    bins.forEach(bin => {
+                        const binSplit = bin.split(',');
+                        const bin0 = parseInt(binSplit[0]);
+                        const bin1 = parseInt(binSplit[1]);
+                        const tempAlbumIds = [...state.reviews[year][publication_id]].filter((review: Review) => review.score >= bin0 && (bin1 === 100 ? review.score <= bin1 : review.score < bin1)).map((entry: Review) => entry.album_id)
+
+                        updatedAlbumIds[year][publication_id][`${bin0},${bin1}`] = tempAlbumIds;
+                    })
+                })
+                return {
+                    selectedAlbumIds: updatedAlbumIds
+                }
             })
         },
         brushSelection: (x1: number, x2: number, y1: number, y2: number, years: number[], publication_id: number) => {

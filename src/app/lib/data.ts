@@ -30,7 +30,6 @@ export async function fetchReviews(publication_ids: number[], years_list: number
             FROM reviews
             WHERE publication_id IN (${publication_ids_string}) AND year IN (${years_string})`);
         const reviews = data.rows;
-        console.log(reviews)
         return reviews;
     } catch (error) {
         console.error('Database Error:', error)
@@ -103,5 +102,29 @@ export async function fetchGenres(album_ids: number[]) {
         throw new Error('Failed to fetch albums.')
     } finally {
         await client.end(); // Close the connection
+    }
+}
+
+
+export async function fetchPubYearStats(publication_id: string, years_list: number[]) {
+    const years_string = years_list.join(',')
+    const client = createClient();
+    await client.connect();
+    try {
+        const data = await client.query(`
+        SELECT p.id, round(avg(r.score)/10,2) as avg_score, count(distinct r.id) as number_of_reviews
+        FROM publications AS p
+        LEFT JOIN reviews as r
+        ON p.id = r.publication_id
+        WHERE p.id = ${publication_id} AND r.year IN (${years_string})
+        GROUP BY p.id
+        ORDER BY number_of_reviews desc`);
+        const stats = data.rows;
+        return stats;
+    } catch (error) {
+        console.error('Database Error:', error)
+        throw new Error('Failed to fetch reviews.')
+    } finally {
+        await client.end();
     }
 }

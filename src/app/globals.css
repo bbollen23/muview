@@ -27,6 +27,23 @@ a {
     height: 8px;
 }
 
+
+
+.small-loading-icon .bp-loading-icon-container {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.small-loading-icon .bp-loading-icon-container .bp-loading-dots {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.small-loading-icon .bp-loading-icon-container .bp-loading-dots .bp-dot {
+    width: 5px;
+    height: 5px;
+}
+
 .pill {
     font-size: 0.8rem;
     padding: 5px 10px;
