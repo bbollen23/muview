@@ -128,3 +128,8 @@ export async function fetchPubYearStats(publication_id: string, years_list: numb
         await client.end();
     }
 }
+
+
+export async function SignUp() {
+
+}

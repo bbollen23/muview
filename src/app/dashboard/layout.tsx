@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from "./layout.module.css";
@@ -17,11 +17,13 @@ import {
     DrawerHeader,
     DrawerItem,
     LoadingOverlay,
+    Divider,
 } from "@bbollen23/brutal-paper";
 import ThemeToggle from '@/app/ui/ThemeToggle';
 import { useDataStore } from '@/providers/data-store-provider';
 import type { DataStore } from '@/stores/data-store';
 import { AlbumList } from '@/app/ui';
+import { useFormState } from 'react-dom';
 
 
 export default function InnerLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +42,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
 
 
 
+    const hiddenSubmitButtonRef = useRef<HTMLButtonElement | null>(null);
     return (
         <Layout className='no-right-margin no-left-margin no-footer'>
             <LoadingOverlay visible={loading} />
@@ -78,6 +81,15 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <DrawerItem icon="bi bi-bar-chart-line-fill" label="Dashboard" onClick={() => { toggleDrawer(); router.push("/dashboard") }} />
                 <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { toggleDrawer(); router.push("/dashboard/publications"); }} />
                 <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" onClick={() => { toggleDrawer(); router.push("/dashboard/filters"); }} />
+                <Divider />
+                <Link href="/user"><DrawerItem icon="bi bi-person-square" label="Profile" /></Link>
+                <a href="/api/auth/logout"><div
+                    className='link'
+                    style={{ marginLeft: '20px', marginTop: '20px', cursor: 'pointer' }}
+                >
+                    Sign Out
+                </div>
+                </a>
             </Drawer>
         </Layout>
     )

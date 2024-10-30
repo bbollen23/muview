@@ -88,6 +88,12 @@ export interface Ranking {
     score: number // Generated during SQL query to get original score
 }
 
+// Basic user, not anything else added yet.
+export interface User {
+    email: string,
+    password: string
+}
+
 
 
 

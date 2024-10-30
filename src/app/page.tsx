@@ -39,6 +39,8 @@ export default function Home() {
               <Link href="/about"><Button label="About MuView" /></Link>
               <Link href="/dashboard"><Button label="Go To Dashboard" iconRight="bi bi-arrow-right" /></Link>
             </div>
+            <a href='/api/auth/login'>Log In</a>
+            {/* <img src='/logos/muview-logo-dark-alt.svg' width='200px' height='200px' /> */}
           </div>
         </div>
       </Body>
