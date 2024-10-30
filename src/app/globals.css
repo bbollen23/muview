@@ -60,6 +60,10 @@ a {
     border-radius: 20px
 }
 
+.bp-header-item .bp-label-container {
+    width: max-content;
+}
+
 
 @keyframes bounce-icon {
 
