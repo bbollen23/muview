@@ -16,7 +16,11 @@ export default function GeneralLayout({ children }: { children: React.ReactNode 
     return (
         <Layout className="smooth">
             <Header>
-                <HeaderTitle><Link href="/">MuView</Link></HeaderTitle>
+                <HeaderTitle>
+                    <Link href="/">
+                        Mu<span style={{ color: 'hsl(var(--fuchsia-500))' }}>V</span>iew
+                    </Link>
+                </HeaderTitle>
                 <HeaderComponent />
             </Header>
             <Body>

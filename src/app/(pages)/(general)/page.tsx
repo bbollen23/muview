@@ -3,14 +3,8 @@ import styles from "./page.module.css";
 import React from 'react';
 import Link from 'next/link';
 import {
-  Layout,
-  Body,
-  Header,
   Button,
-  HeaderGroup,
-  HeaderItem
 } from "@bbollen23/brutal-paper";
-import ThemeToggle from "@/app/ui/ThemeToggle";
 
 
 export default function Home() {
@@ -20,7 +14,7 @@ export default function Home() {
     <div className={styles.home}>
       <div className={styles.container}>
         <div className={styles.title}>
-          MuView
+          Mu<span style={{ color: 'hsl(var(--fuchsia-500))' }}>V</span>iew
         </div>
         <div className={styles.subTitle}>
           A Music Review Visualization Platform.

@@ -46,7 +46,12 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
         <Layout className='no-right-margin no-left-margin no-footer'>
             <LoadingOverlay visible={loading} />
             <Header>
-                <HeaderTitle><Icon icon='bi bi-list' onClick={toggleDrawer} style={{ marginRight: '10px' }} /><Link href="/">MuView</Link></HeaderTitle>
+                <HeaderTitle>
+                    <Icon icon='bi bi-list' onClick={toggleDrawer} style={{ marginRight: '10px' }} />
+                    <Link href="/">
+                        Mu<span style={{ color: 'hsl(var(--fuchsia-500))' }}>V</span>iew
+                    </Link>
+                </HeaderTitle>
                 <HeaderComponent />
             </Header>
             <Body>
