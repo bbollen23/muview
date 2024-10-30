@@ -8,22 +8,19 @@ import {
     Layout,
     Body,
     Header,
-    HeaderItem,
-    Button,
     HeaderTitle,
     Icon,
-    HeaderGroup,
     Drawer,
     DrawerHeader,
     DrawerItem,
     LoadingOverlay,
     Divider,
 } from "@bbollen23/brutal-paper";
-import ThemeToggle from '@/app/ui/ThemeToggle';
+// import ThemeToggle from '@/app/ui/ThemeToggle';
+import { HeaderComponent } from '@/app/ui';
 import { useDataStore } from '@/providers/data-store-provider';
 import type { DataStore } from '@/stores/data-store';
 import { AlbumList } from '@/app/ui';
-import { useFormState } from 'react-dom';
 
 
 export default function InnerLayout({ children }: { children: React.ReactNode }) {
@@ -40,26 +37,20 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
     const loading = useDataStore((state: DataStore) => state.loading);
 
 
+    const pagesWithOutAlbumList = ['Publications', 'User']
+    const albumListRendered = (page_name: string): boolean => {
+        return !pagesWithOutAlbumList.includes(page_name);
+    }
 
-
-    const hiddenSubmitButtonRef = useRef<HTMLButtonElement | null>(null);
     return (
         <Layout className='no-right-margin no-left-margin no-footer'>
             <LoadingOverlay visible={loading} />
             <Header>
                 <HeaderTitle><Icon icon='bi bi-list' onClick={toggleDrawer} style={{ marginRight: '10px' }} /><Link href="/">MuView</Link></HeaderTitle>
-                <HeaderGroup alignment="right">
-                    <Link href="/"><HeaderItem label="Home" /></Link>
-                    <Link href="/about"><HeaderItem label="About" /></Link>
-                    <Link href="/projectgoals"><HeaderItem label="Project Goals" /></Link>
-                    <Link href="/contact"><HeaderItem label="Contact" /></Link>
-                    <Link href="/donate"><Button label="Donate" size="sm" /></Link>
-                    <Button label="Get Help" size="sm" />
-                    <ThemeToggle style={{ marginRight: '20px' }} />
-                </HeaderGroup>
+                <HeaderComponent />
             </Header>
             <Body>
-                <div className={pageName === 'Publications' ? styles.dashboardContainerFull : styles.dashboardContainer}>
+                <div className={albumListRendered(pageName) ? styles.dashboardContainer : styles.dashboardContainerFull}>
                     <div className={styles.pageContainer}>
                         {pageName !== 'Filters' ? <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h1 style={{ marginTop: 0 }}>
@@ -68,7 +59,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                         </div> : null}
                         {children}
                     </div>
-                    {pageName !== 'Publications' ?
+                    {albumListRendered(pageName) ?
                         <div className={styles.albumListAreaContainer}>
                             <h1 style={{ marginLeft: '20px', marginTop: 0 }}>Albums Selected</h1>
                             <AlbumList />
@@ -83,7 +74,8 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <DrawerItem icon="bi bi-file-richtext" label="Edit Publications" onClick={() => { toggleDrawer(); router.push("/dashboard/publications"); }} />
                 <DrawerItem icon="bi bi-bar-chart-steps" label="Filters" onClick={() => { toggleDrawer(); router.push("/dashboard/filters"); }} />
                 <Divider />
-                <Link href="/user"><DrawerItem icon="bi bi-person-square" label="Profile" /></Link>
+                <DrawerItem icon="bi bi-person-square" label="Profile" onClick={() => { toggleDrawer(); router.push("/dashboard/user"); }} />
+
                 <a href="/api/auth/logout"><div
                     className='link'
                     style={{ marginLeft: '20px', marginTop: '20px', cursor: 'pointer' }}
