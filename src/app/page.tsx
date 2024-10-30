@@ -20,6 +20,7 @@ export default function Home() {
       <Header>
         <HeaderGroup alignment="right">
           <Link href="/about"><HeaderItem label="About" /></Link>
+          <Link href="/projectgoals"><HeaderItem label="Project Goals" /></Link>
           <Link href="/contact"><HeaderItem label="Contact" /></Link>
           <Link href="/donate"><Button label="Donate" size="sm" /></Link>
           <Button label="Get Help" size="sm" />

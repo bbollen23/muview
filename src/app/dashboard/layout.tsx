@@ -51,6 +51,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
                 <HeaderGroup alignment="right">
                     <Link href="/"><HeaderItem label="Home" /></Link>
                     <Link href="/about"><HeaderItem label="About" /></Link>
+                    <Link href="/projectgoals"><HeaderItem label="Project Goals" /></Link>
                     <Link href="/contact"><HeaderItem label="Contact" /></Link>
                     <Link href="/donate"><Button label="Donate" size="sm" /></Link>
                     <Button label="Get Help" size="sm" />

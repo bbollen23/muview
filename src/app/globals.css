@@ -77,6 +77,10 @@ a {
     height: 30px;
 } */
 
+.bp-header-item .bp-label-container {
+    width: max-content;
+}
+
 
 @keyframes bounce-icon {
 
