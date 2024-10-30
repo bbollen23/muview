@@ -2,17 +2,15 @@
 
 
 'use client'
-import { useTheme } from '@/providers/theme-provider';
 import { Card, Scrollable, Icon } from '@bbollen23/brutal-paper';
 import styles from './page.module.scss'
 import React from 'react';
 
 export default function ProjectGoals() {
-    const { theme } = useTheme();
     return (
         <Scrollable height='calc(100vh - 200px)' width='100%'>
             <h1 style={{ fontSize: '3.0rem' }}>Project Goals</h1>
-            <p>The goal of this project is to bring as much detailed information into each album as possible and make MuView accessible to anyone interested in finding new music. Because of this, we've separated the goals of MuView into three chunks:</p>
+            <p>The goal of this project is to bring as much detailed information into each album as possible and make MuView accessible to anyone interested in finding new music. Because of this, we&apos;ve separated the goals of MuView into three chunks:</p>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <Card title={<div style={{ paddingTop: '20px' }}>Personalized Profiles</div>}>
                     <div className={styles.bulletPoints}>
