@@ -1,5 +1,5 @@
 import { sql, createClient } from '@vercel/postgres';
-import type { Publication } from './definitions';
+import type { Publication, User, Album } from './definitions';
 
 export async function fetchPublications() {
     try {
@@ -130,6 +130,65 @@ export async function fetchPubYearStats(publication_id: string, years_list: numb
 }
 
 
-export async function SignUp() {
+export async function checkIfUserExists(email: string) {
+    try {
+        const data = await sql<User>`
+        SELECT email, name FROM users WHERE email = ${email}`;
 
+        const users = data.rows;
+        if (users.length > 0) return true;
+        return false;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch users.')
+    }
+}
+
+
+
+export async function createUser(email: string, name: string) {
+    try {
+        const data = await sql<User>`
+        INSERT INTO USERS (email, name, albums_saved) VALUES (${email}, ${name}, '{}')
+        RETURNING *
+        `;
+        return data;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to create user.')
+    }
+}
+
+
+export async function fetchUser(email: string) {
+    try {
+        const data = await sql<User>`
+        SELECT * FROM users WHERE email = ${email}`;
+
+        const user = data.rows;
+        return user;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch user.')
+    }
+}
+
+
+export async function fetchUserAlbums(email: string) {
+    try {
+        const data = await sql<Album>`
+        select * from albums as a
+        inner join user_albums as ua on ua.album_id = a.id 
+        where ua.user_email = ${email}
+        `;
+
+        const user = data.rows;
+        return user;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to User Albums')
+    }
 }

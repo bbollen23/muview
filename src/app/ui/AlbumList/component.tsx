@@ -10,6 +10,9 @@ import useSWR from "swr";
 import { fetcher } from '@/app/lib/fetcher';
 import { getAlbumIdsFromFilters } from "@/app/lib/filterAlbums";
 import { downloadCsv } from "@/app/lib/downloadCsv";
+import { addAlbums } from "@/app/lib/actions";
+import { useUser, UserContext } from '@auth0/nextjs-auth0/client';
+
 
 
 const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings: AlbumIdsSelectedRanking): number[] => {
@@ -53,7 +56,7 @@ interface SelectedAlbumInfo {
 
 const AlbumList = () => {
     const { notify } = useNotification();
-
+    const authData: UserContext = useUser();
 
     const selectedAlbumIds = useDataStore((state: DataStore) => state.selectedAlbumIds);
     const selectedAlbumIdsRankings = useDataStore((state: DataStore) => state.selectedAlbumIdsRankings)
@@ -70,8 +73,22 @@ const AlbumList = () => {
 
 
 
-    const { data, isLoading } = useSWR(
+    const { data: albumData, isLoading: isAlbumsLoading } = useSWR(
         `/api/albums?album_ids=${flatAlbumIds}`,
+        fetcher)
+
+    /**
+     * For future me sake:
+     * 
+     * We have a local state for the userAlbumIds. Whenever we fetch the user albums, we replace this state with the state from the table.
+     * 
+     * When we save an album, we immediately update the local state. Thats because the useSWR will not automatically get triggered and we shouldn't be doing this in a way that's like "update database -> wait for response -> refetch". We should separately update the state.
+     * 
+     * So, the useSWR call is essentially re-hydrating our local userAlbumIds. But we interact with this state separately as well. This is the standard for how we should handle interacting with fetched data.
+     */
+
+    const { data: userAlbums } = useSWR(
+        authData && authData.user ? `/api/userAlbums?email=${authData.user.email}` : null,
         fetcher)
 
     const getReviews = (album: Album): Review[] => {
@@ -117,8 +134,18 @@ const AlbumList = () => {
 
     const [sortBy, setSortBy] = useState<string | null>(null)
     const [selectedAlbumInfo, setSelectedAlbumInfo] = useState<SelectedAlbumInfo | null>(null);
+    const [localUserAlbumIds, setLocalUserAlbumIds] = useState<number[]>([]);
+    const [modalOpened, setModalOpened] = useState<boolean>(false);
 
-    // const albumList: Album[] = totalAlbums.filter((entry: Album) => entry.album_title.toLowerCase().includes(searchTermAlbum.toLowerCase()) || entry.artists.join(",").toLowerCase().includes(searchTermAlbum.toLowerCase()))
+
+    // Hydrate localUserAlbumIds with data from fetching
+    useEffect(() => {
+        if (userAlbums) {
+            const userAlbumIds = userAlbums.albums.map((album: Album) => album.id)
+            setLocalUserAlbumIds(userAlbumIds)
+        }
+    }, [userAlbums])
+
 
     const albumList: AlbumWithScore[] = totalAlbums
         .filter((entry: Album) =>
@@ -168,10 +195,10 @@ const AlbumList = () => {
 
     // Can use unique list instead of list of albums. Will be easier.
     useEffect(() => {
-        if (data && data.albums) {
+        if (albumData && albumData.albums) {
             const previousAlbumList = previousAlbumListRef.current;
 
-            let newAlbumsCount = data.albums.filter((album: Album) =>
+            let newAlbumsCount = albumData.albums.filter((album: Album) =>
                 !previousAlbumList.map(entry => entry.id).includes(album.id)
             ).length;
 
@@ -182,7 +209,7 @@ const AlbumList = () => {
                 })
             } else {
                 newAlbumsCount = previousAlbumList.filter(album =>
-                    !data.albums.map((entry: Album) => entry.id).includes(album.id)
+                    !albumData.albums.map((entry: Album) => entry.id).includes(album.id)
                 ).length;
                 if (newAlbumsCount > 0) {
                     notify({
@@ -192,21 +219,20 @@ const AlbumList = () => {
                 }
             }
 
-            previousAlbumListRef.current = data.albums;
+            previousAlbumListRef.current = albumData.albums;
 
             //For searching
-            setTotalAlbums(data.albums);
+            setTotalAlbums(albumData.albums);
         }
 
 
-    }, [data])
+    }, [albumData])
 
     const handleSearchTermAlbumChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTermAlbum(event.target.value); // Update the search term state
     };
 
 
-    const [modalOpened, setModalOpened] = useState<boolean>(false);
 
 
     const toggleModal = () => {
@@ -235,7 +261,28 @@ const AlbumList = () => {
         downloadCsv(sortedAlbumList, publicationsSelected);
     }
 
+    const handleSaveAlbum = async () => {
+        if (authData && authData.user && authData.user.email && selectedAlbumInfo) {
+            setLocalUserAlbumIds(prev => [...prev, selectedAlbumInfo.album.id])
+            await addAlbums(authData.user.email, [selectedAlbumInfo.album.id])
+        }
+    }
 
+    const SaveAlbumButton = () => {
+        if (selectedAlbumInfo && userAlbums) {
+
+            const saved = localUserAlbumIds.includes(selectedAlbumInfo.album.id)
+
+            const disabled = !authData.user || saved
+
+
+            return (
+                <Button disabled={disabled} flat label={saved ? 'Saved' : 'Save Album'} onClick={handleSaveAlbum} />
+            )
+        }
+
+        return null
+    }
 
     return (
 
@@ -243,7 +290,7 @@ const AlbumList = () => {
             <div className={styles.albumSelectorArea}>
                 <Input label="Search" placeholder="Search Albums" value={searchTermAlbum} onChange={handleSearchTermAlbumChange} />
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {data && data.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <b>Showing 0/0 Albums</b>}
+                    {albumData && albumData.albums.length > 0 ? <b>Showing {`${albumList.length}/${totalAlbums.length}`} Albums</b> : <b>Showing 0/0 Albums</b>}
                     <div style={{ display: 'flex' }}>
                         <Tooltip size="sm" timeoutLength={1000} content='Sort By'>
                             <IconDropdown
@@ -252,9 +299,6 @@ const AlbumList = () => {
                                 onChange={handleOnSortByChange}
                             />
                         </Tooltip>
-                        {/* <Tooltip size="sm" content='Clear albums'>
-                            <Icon icon='bi bi-trash' size='sm' />
-                        </Tooltip> */}
                         <Tooltip size="sm" content='Download as CSV'>
                             <Icon icon='bi bi-download' size='sm' onClick={handleDownloadCsv} />
                         </Tooltip>
@@ -266,14 +310,13 @@ const AlbumList = () => {
                 </div>
             </div>
             <Scrollable width='100%' height='calc(100vh - 340px)'>
-                {isLoading ?
+                {isAlbumsLoading ?
                     <div className={styles.loadingAlbumsContainer}>
                         <div style={{ fontSize: '1.2rem' }}>Loading</div><LoadingIcon visible={true} />
                     </div>
                     : sortedAlbumList.map((album: AlbumWithScore) => {
                         const rankings = getRankings(album)
                         return (
-                            // <div></div>
                             <AlbumComponent onClick={() => handleAlbumClick(album, album.reviews, rankings, album.avg_score)} avgScore={album.avg_score} key={album.id} album={album} reviews={album.reviews} rankings={rankings} />
                         )
                     })
@@ -287,9 +330,11 @@ const AlbumList = () => {
                 closeOnOutside
                 actions={
                     <>
+                        <SaveAlbumButton />
                         <Button flat label='Close' onClick={toggleModal} />
                     </>
-                }>                <ModalHeader
+                }>
+                <ModalHeader
                     closeButton={true}
                     title={selectedAlbumInfo?.album.album_title}
                 />

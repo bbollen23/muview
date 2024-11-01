@@ -7,9 +7,15 @@ import {
   AfterCallbackAppRoute
 } from '@auth0/nextjs-auth0';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkIfUserExists, createUser } from '@/app/lib/data';
 
-const afterCallback: AfterCallbackAppRoute = (req: NextRequest, session: Session) => {
+const afterCallback: AfterCallbackAppRoute = async (req: NextRequest, session: Session) => {
   if (session.user) {
+    const { email, name } = session.user;
+    const userExists = await checkIfUserExists(email);
+    if (!userExists) {
+      await createUser(email, name);
+    }
     return session;
   }
 };
