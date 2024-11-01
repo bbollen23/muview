@@ -56,56 +56,6 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
         setVisible(false);
     }
 
-
-    // const AlbumToolTip = () => {
-    //     return <div
-    //         className={theme === 'dark' ? clsx(styles.albumToolTip, styles.albumToolTipDark) : styles.albumToolTip}
-    //         style={{ top: `${position.top}px`, left: `${position.left}px` }}
-    //     >
-    //         <div style={{ display: 'flex', flexDirection: 'row', gap: '40px', justifyContent: 'space-between' }}>
-    //             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column' }}>
-    //                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-    //                     {album.album_title}
-    //                 </div>
-    //                 <div style={{ marginTop: '10px', fontSize: '1.2rem' }}>
-    //                     {album.artists.join(',')}
-    //                 </div>
-    //             </div>
-    //             <div className={styles.img} style={{ width: '100px', minWidth: '100px', height: '100px', fontSize: '1.0rem' }}>
-    //                 No Image Available
-    //             </div>
-    //         </div>
-    //         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-    //             <div>
-    //                 <b>Genres:</b> {album.genres.join(',')}
-    //             </div>
-    //             <div>
-    //                 <b>Subgenres:</b> {album.subgenres.join(',')}
-    //             </div>
-    //             <div>
-    //                 <b>Release Date:</b> {new Date(album.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-    //             </div>
-    //         </div>
-    //         <div className={styles.reviewSection}>
-    //             {reviews.map((review: Review) => (
-    //                 <div key={`${review.id}`} className={styles.review}>
-    //                     <div className={styles.publicationName}>
-    //                         {<div>{publicationsSelected.filter((publication: Publication) => review.publication_id === publication.id)[0].name}</div>}
-    //                     </div>
-    //                     <div style={{ display: 'flex', flexDirection: 'row', gap: "10px" }}>
-    //                         <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
-    //                             {review.score}
-    //                         </div>
-    //                         {rankings.find((entry: Ranking) => entry.publication_id == review.publication_id) ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
-    //                             #{rankings.find((entry: Ranking) => entry.publication_id == review.publication_id)?.rank}
-    //                         </div> : null}
-    //                     </div>
-    //                 </div>
-    //             ))}
-    //         </div>
-    //     </div>
-    // }
-
     const AlbumToolTip = () => {
         return (
             <div
@@ -168,7 +118,6 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
                     </div>
                 </div>
             </div>
-
         </div>
     )
 }

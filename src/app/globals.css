@@ -60,6 +60,23 @@ a {
     border-radius: 20px
 }
 
+.link:hover {
+    text-decoration: underline;
+}
+
+/* .login-error-banner .bp-banner.alert {
+    padding: 5px;
+    border: none;
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+}
+
+.login-error-banner .bp-banner.alert .bp-action-icon i {
+    font-size: 20px;
+    width: 30px;
+    height: 30px;
+} */
+
 .bp-header-item .bp-label-container {
     width: max-content;
 }

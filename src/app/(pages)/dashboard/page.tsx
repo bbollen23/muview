@@ -25,6 +25,7 @@ function Dashboard({ }) {
   const [yearClickState, setYearClickState] = useState<boolean[]>(yearsList.map((year: string) => selectedYears.includes(parseInt(year))));
 
 
+
   const handleSelectYear = (switchGroupState: boolean[]) => {
     const tempYearList = yearsList.filter((entry: string, index: number) => switchGroupState[index]);
     setSelectedYears(tempYearList);
