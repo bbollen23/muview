@@ -1,9 +1,9 @@
 'use client'
 import styles from "./component.module.scss";
-import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown, Modal, Button, ModalHeader, ModalContent } from "@bbollen23/brutal-paper";
+import { LoadingIcon, useNotification, Scrollable, Input, Icon, Tooltip, IconDropdown, Button, } from "@bbollen23/brutal-paper";
 import { type DataStore } from '@/stores/data-store'
 import { useDataStore } from "@/providers/data-store-provider";
-import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore, Publication } from "@/app/lib/definitions";
+import type { Album, Review, Ranking, AlbumIdsSelected, AlbumIdsSelectedRanking, AlbumWithScore } from "@/app/lib/definitions";
 import { useRef, useEffect, useState } from "react";
 import AlbumComponent from "@/app/ui/AlbumList/Album";
 import useSWR from "swr";
@@ -12,6 +12,7 @@ import { getAlbumIdsFromFilters } from "@/app/lib/filterAlbums";
 import { downloadCsv } from "@/app/lib/downloadCsv";
 import { addAlbums } from "@/app/lib/actions";
 import { useUser, UserContext } from '@auth0/nextjs-auth0/client';
+import AlbumDetailModal from "./AlbumDetailModal";
 
 
 
@@ -47,7 +48,7 @@ const getUniqueList = (albumsSelected: AlbumIdsSelected, albumsSelectedRankings:
     return Array.from(uniqueIdSet); // Return unique items as an array
 };
 
-interface SelectedAlbumInfo {
+export interface SelectedAlbumInfo {
     album: AlbumWithScore,
     reviews: Review[],
     rankings: Ranking[],
@@ -322,64 +323,16 @@ const AlbumList = () => {
                     })
                 }
             </Scrollable>
-            <Modal
-                style={{ width: '700px' }}
-                opened={modalOpened}
-                setOpened={setModalOpened}
-                onClose={handleCloseModal}
-                closeOnOutside
-                actions={
-                    <>
-                        <SaveAlbumButton />
-                        <Button flat label='Close' onClick={toggleModal} />
-                    </>
-                }>
-                <ModalHeader
-                    closeButton={true}
-                    title={selectedAlbumInfo?.album.album_title}
-                />
-                <ModalContent style={{ marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                {selectedAlbumInfo?.album.album_title}
-                            </div>
-                            <div style={{ fontSize: '1.2rem' }}>
-                                {selectedAlbumInfo?.album.artists.join(', ')}
-                            </div>
-                            <div style={{ marginTop: '20px' }}>
-                                <b>Genres:</b> {selectedAlbumInfo?.album.genres.join(', ')}
-                            </div>
-                            <div>
-                                <b>Subgenres:</b> {selectedAlbumInfo?.album.subgenres.join(', ')}
-                            </div>
-                            <div>
-                                <b>Release Date:</b> {selectedAlbumInfo ? new Date(selectedAlbumInfo.album.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
-                            </div>
-                        </div>
-                        <div className={styles.img} style={{ width: '100px', minWidth: '100px', height: '100px', fontSize: '1.0rem' }}>
-                            No Image Available
-                        </div>
-                    </div>
-                    <div className={styles.reviewSection}>
-                        {selectedAlbumInfo?.reviews.map((review: Review) => (
-                            <div key={`${review.id}`} className={styles.review}>
-                                <div className={styles.publicationName}>
-                                    {<div>{publicationsSelected.filter((publication: Publication) => review.publication_id === publication.id)[0].name}</div>}
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'row', gap: "10px" }}>
-                                    <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
-                                        {review.score}
-                                    </div>
-                                    {selectedAlbumInfo?.rankings.find((entry: Ranking) => entry.publication_id == review.publication_id) ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publicationsSelected.findIndex(item => item.id === review.publication_id)] }}>
-                                        #{selectedAlbumInfo?.rankings.find((entry: Ranking) => entry.publication_id == review.publication_id)?.rank}
-                                    </div> : null}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </ModalContent>
-            </Modal>
+            <AlbumDetailModal
+                modalOpened={modalOpened}
+                setModalOpened={setModalOpened}
+                handleCloseModal={handleCloseModal}
+                toggleModal={toggleModal}
+                selectedAlbumInfo={selectedAlbumInfo?.album}
+                publicationsSelected={publicationsSelected}
+                chartColorScheme={chartColorScheme}
+                SaveAlbumButton={SaveAlbumButton}
+            />
         </div>
     )
 }
