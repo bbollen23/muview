@@ -7,152 +7,61 @@
 
         .albumsSaved {
             width: 100%;
-            /* Ensure the table takes full width of its container */
             border-collapse: collapse;
-            /* Collapse borders for better styling */
 
             .albumsSavedHeader {
                 font-weight: bold;
                 font-size: 1.4rem;
-                border-bottom: 2px solid #ccc;
                 text-align: left;
+
+                tr th {
+                    border-bottom: 1px solid #ccc;
+                    padding: 12px 8px;
+
+                }
             }
 
             .albumsSavedRow {
-                &:nth-child(even) {
-                    /* Optional: zebra striping for rows */
-                }
 
                 td {
                     padding: 8px;
-                    /* Padding for each cell */
                     border-bottom: 1px solid #ddd;
-                    /* Add bottom border for each row */
+                }
+            }
+        }
+
+        .darkMode.albumsSaved {
+
+            .albumsSavedHeader {
+
+                tr th {
+                    border-bottom: 1px solid hsl(var(--gray-950));
                 }
             }
 
-            th {
-                padding: 12px 8px;
-                /* Padding for header cells */
-                border-bottom: 2px solid #ccc;
-                /* Border for header */
+            .albumsSavedRow {
+
+                td {
+                    border-bottom: 1px solid hsl(var(--gray-950));
+                    // border-bottom: none;
+                }
             }
+
         }
     }
 }
 
-
-
-
-
-
-
-.albumsContainer .album {
+.imageIcon {
     display: flex;
-    flex-direction: row;
-    padding: 10px 0px 10px 0px;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 6.5px;
+    transition: 0.1s ease-in;
     cursor: pointer;
 }
 
-.albumsContainer .album:hover {
+.imageIcon:hover {
     background-color: var(--bp-theme-item-hover-color);
-}
-
-.albumsContainer .album .left {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.albumsContainer .album .left .info {
-    display: flex;
-    flex-direction: column;
-}
-
-.img {
-    width: 50px;
-    height: 50px;
-    border: 1px solid var(--bp-theme-border-color);
-    font-size: 0.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.albumsContainer .album .left .albumTitle {
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-.albumsContainer .album .left .artist {
-    font-size: 0.8rem;
-}
-
-.albumToolTip {
-    width: 500px;
-    height: 300px;
-    background-color: var(--bp-theme-card-background-color);
-    color: var(--bp-theme-text-color);
-    padding: 5px;
-    border-radius: 4px;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-    border: 1px solid var(--bp-theme-card-border-color);
-    box-shadow: -4px 4px 4px hsl(var(--gray-900));
-    padding: 10px;
-    z-index: 1000;
-    position: absolute;
-
-    flex-direction: column;
-    display: flex;
-}
-
-.albumToolTipDark {
-    background-color: hsl(var(--slate-800));
-    box-shadow: -4px 4px 4px var(--bp-theme-card-shadow-color);
-}
-
-.reviewSection {
-    margin-top: 20px;
-    padding-top: 20px;
-    margin-bottom: 40px;
-    border-top: 1px solid var(--bp-theme-border-color);
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    flex: 1;
-}
-
-.review {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-}
-
-.score {
-    background-color: var(--bp-theme-card-shadow-color);
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-}
-
-
-
-.albumSelectorArea {
-    margin-left: 20px;
-    display: flex;
-    border-bottom: 1px solid var(--bp-theme-border-color);
-    flex: 1;
-    flex-direction: column;
-    padding-bottom: 5px;
 }

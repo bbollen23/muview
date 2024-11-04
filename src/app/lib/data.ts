@@ -1,5 +1,5 @@
 import { sql, createClient } from '@vercel/postgres';
-import type { Publication, User, Album } from './definitions';
+import type { Publication, User, Album, Review } from './definitions';
 
 export async function fetchPublications() {
     try {
@@ -190,5 +190,24 @@ export async function fetchUserAlbums(email: string) {
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to User Albums')
+    }
+}
+
+
+export async function fetchAlbumReviews(album_id: string) {
+    try {
+
+        const data = await sql<Review>`
+        SELECT r.score, r.id, r.publication_id, p.name
+        FROM reviews as r
+        LEFT JOIN publications as p
+        ON r.publication_id = p.id
+        WHERE r.album_id = ${album_id}
+        `;
+        const reviews = data.rows;
+        return reviews;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch reviews.')
     }
 }

@@ -147,3 +147,18 @@
     opacity: 1;
     transition: opacity 1s ease;
 }
+
+.imageIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 6.5px;
+    transition: 0.1s ease-in;
+    cursor: pointer;
+}
+
+.imageIcon:hover {
+    background-color: var(--bp-theme-item-hover-color);
+}
