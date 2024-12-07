@@ -63,7 +63,6 @@ const AlbumList = () => {
     const selectedAlbumIdsRankings = useDataStore((state: DataStore) => state.selectedAlbumIdsRankings)
     const selectedFilters = useDataStore((state: DataStore) => state.selectedFilters);
     const publicationsSelected = useDataStore((state: DataStore) => state.publicationsSelected);
-    const chartColorScheme = useDataStore((state: DataStore) => state.chartColorScheme);
 
     const reviews = useDataStore((state: DataStore) => state.reviews);
     const rankings = useDataStore((state: DataStore) => state.rankings);

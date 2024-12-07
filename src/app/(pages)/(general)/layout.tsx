@@ -8,7 +8,6 @@ import {
     HeaderTitle,
     Sidebar,
     SidebarItem,
-    Divider,
     SidebarSectionTitle
 } from "@bbollen23/brutal-paper";
 import { usePathname, useRouter } from 'next/navigation';
