@@ -23,8 +23,8 @@ const LoginComponent = ({ authData, pathName }: LoginComponentProps) => {
     if (authData.user) {
         return (
             <>
-                {pathName.includes('dashboard') ? null : <Link href="/dashboard"><Button label="Dashboard" size="sm" /></Link>}
-                {pathName.includes('dashboard') ? null : <Link href="/dashboard/user"><Button label="Profile" size="sm" /></Link>}
+                {pathName.includes('dashboard') && !pathName.includes('howitworks') ? null : <Link href="/dashboard"><Button label="Dashboard" size="sm" /></Link>}
+                {pathName.includes('dashboard') && !pathName.includes('howitworks') ? null : <Link href="/dashboard/user"><Button label="Profile" size="sm" /></Link>}
                 <a href='/api/auth/logout'><Button label="Sign Out" size="sm" /></a>
             </>
         )
@@ -42,6 +42,7 @@ export default function HeaderComponent() {
         <>
             <HeaderGroup alignment="left">
                 <Link href="/about"><HeaderItem label="About" /></Link>
+                <Link href="/howitworks"><HeaderItem label="How It Works" /></Link>
                 <Link href="/projectgoals"><HeaderItem label="Project Goals" /></Link>
                 <Link href="/contact"><HeaderItem label="Contact" /></Link>
             </HeaderGroup>

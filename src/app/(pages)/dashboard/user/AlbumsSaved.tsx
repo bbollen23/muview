@@ -9,7 +9,6 @@ import { useTheme } from '@/providers/theme-provider'
 import clsx from 'clsx'
 import { AlbumDetailModal } from '@/app/ui'
 import type { SelectedAlbumInfo } from '@/app/ui/AlbumList/component'
-import { useDataStore } from "@/providers/data-store-provider";
 import { AlbumWithScore, Review, Ranking } from '@/app/lib/definitions'
 
 interface AlbumsSavedProps {
@@ -25,8 +24,6 @@ export default function AlbumsSaved({ userAlbums, userEmail }: AlbumsSavedProps)
     const [modalOpened, setModalOpened] = useState<boolean>(false);
     const [selectedAlbumInfo, setSelectedAlbumInfo] = useState<SelectedAlbumInfo | null>(null);
 
-    const publicationsSelected = useDataStore((state) => state.publicationsSelected);
-    const chartColorScheme = useDataStore((state) => state.chartColorScheme);
 
 
     const toggleModal = () => {
@@ -90,7 +87,7 @@ export default function AlbumsSaved({ userAlbums, userEmail }: AlbumsSavedProps)
                                                 <Tooltip size='sm' content='Bandcamp'>
                                                     <div className={styles.imageIcon}>
                                                         <a href={album.bandcamp_url} target="_blank" style={{ width: '25px', height: '25px' }}>
-                                                            {theme === 'dark' ? <img src='/logos/bandcamp-dark.png' width='25px' height='25px' /> : <img src='/logos/bandcamp-light.png' width='25px' height='25px' />}
+                                                            {theme === 'dark' ? <img src='/images/logos/bandcamp-dark.png' width='25px' height='25px' /> : <img src='/images/logos/bandcamp-light.png' width='25px' height='25px' />}
                                                         </a>
                                                     </div>
                                                 </Tooltip>
@@ -117,10 +114,7 @@ export default function AlbumsSaved({ userAlbums, userEmail }: AlbumsSavedProps)
                 modalOpened={modalOpened}
                 setModalOpened={setModalOpened}
                 handleCloseModal={handleCloseModal}
-                toggleModal={toggleModal}
                 selectedAlbumInfo={selectedAlbumInfo?.album}
-                publicationsSelected={publicationsSelected}
-                chartColorScheme={chartColorScheme}
             />
         </>
 

@@ -327,10 +327,7 @@ const AlbumList = () => {
                 modalOpened={modalOpened}
                 setModalOpened={setModalOpened}
                 handleCloseModal={handleCloseModal}
-                toggleModal={toggleModal}
                 selectedAlbumInfo={selectedAlbumInfo?.album}
-                publicationsSelected={publicationsSelected}
-                chartColorScheme={chartColorScheme}
                 SaveAlbumButton={SaveAlbumButton}
             />
         </div>

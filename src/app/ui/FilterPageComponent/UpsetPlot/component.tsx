@@ -608,7 +608,7 @@ const UpsetPlot = ({ onHover }: UpsetPlotProps): JSX.Element => {
                             <img
                                 style={{ boxSizing: 'border-box' }}
                                 className='pub-icon'
-                                src={`/images/${pub_unique_name}.webp`}
+                                src={`/images/publications/${pub_unique_name}.webp`}
                                 width={`${Math.min(30, bandWidth - 2)}px`}
                                 height={`${Math.min(30, bandWidth - 2)}px`}
                             />

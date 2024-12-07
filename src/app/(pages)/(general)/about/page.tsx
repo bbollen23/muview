@@ -8,14 +8,8 @@ export default function About() {
     return (
         <Scrollable height='calc(100vh - 200px)' width='100%'>
             <h1 style={{ fontSize: '3.0rem' }}>About</h1>
-            <p>MuView is a Music Review visualization platform. Instead of using aggregate sites such as Metacritic to find albums, MuView provides you with much more detailed and nuanced information while also allowing the user to choose which publications they find important. Below is the general idea of how MuView Works.</p>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', margin: '50px 0px' }}>
-                <img width='70%' src={theme === 'dark' ? "/images/design-dark.png" : "/images/design-light.png"}></img>
-                <div style={{ marginLeft: '40px' }}>
-                    <p>MuView allows you to select from a list of publications to populate your dashboard. From there, you can select specific score ranges in each publication. This will populate the Album list with all the albums that fit into those ranges. Afterwards, you can apply additional filtering by genre, or you can apply filtering by groups.</p>
-                    <p>Filtering by groups allows you to find albums which fall into the range of several scores from multiple publications. For example, you can find all albums that received a score of 80 or above on all of your chosen publications, or find divisive albums by doing the opposite.</p>
-                </div>
-            </div>
+            <p style={{ fontSize: '1.2rem' }}>MuView is a Music Review visualization platform. Instead of using aggregate sites such as Metacritic to find albums, MuView provides you with much more detailed and nuanced information while also allowing the user to choose which publications they find important.</p>
+            <p style={{ fontSize: '1.2rem' }}>This project was first envisioned in 2018 during a Data Visualization graduate course. In this course, I fell in love with all aspects of data visualization and found an intense interest in web applications. After years of putting this project off due to work, life, and graduate school, I've finally found the time to create and maintain this application as a side project.</p>
         </Scrollable>
     )
 }

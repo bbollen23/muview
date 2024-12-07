@@ -43,7 +43,7 @@ const Chart = ({ publication, years, type }: ChartProps) => {
                     <div className={styles.headerGroup}>
                         <img
                             className='pub-icon'
-                            src={`/images/${publication.unique_name}.webp`}
+                            src={`/images/publications/${publication.unique_name}.webp`}
                             width="30px"
                             height="30px"
                         />

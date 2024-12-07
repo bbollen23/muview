@@ -229,14 +229,6 @@ const AlbumReviewsChart = ({ reviews, publicationsSelected, chartColorScheme }: 
                 spec={spec}
                 actions={false}
             />
-            {/* <div style={{ position: 'relative', top: '-20px' }}>
-                <Tooltip size='sm' content='Show All Reviews'>
-                    <Icon
-                        size="sm"
-                        icon='bi bi-music-note-list'
-                    />
-                </Tooltip>
-            </div> */}
         </div>
     )
 }

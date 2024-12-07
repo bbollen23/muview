@@ -6,17 +6,15 @@ import AlbumReviewsChart from './AlbumReviewsChart';
 import useSWR from 'swr';
 import { fetcher } from '@/app/lib/fetcher';
 import { useTheme } from '@/providers/theme-provider';
+import { useDataStore } from '@/providers/data-store-provider';
 
 
 interface AlbumDetailModalProps {
     modalOpened: boolean;
     setModalOpened: Dispatch<SetStateAction<boolean>>;
     handleCloseModal: () => void;
-    toggleModal: () => void;
     selectedAlbumInfo?: Album;
-    publicationsSelected: Publication[];
-    chartColorScheme: string[];
-    SaveAlbumButton?: React.ComponentType
+    SaveAlbumButton?: React.ComponentType;
 }
 
 export interface AlbumReviewData {
@@ -78,7 +76,7 @@ const AlbumLinks = ({ selectedAlbumInfo, theme }: AlbumLinksProps) => {
                 <Tooltip size='sm' content='Bandcamp'>
                     <div className={styles.imageIcon}>
                         <a href={bandcamp_url} target="_blank" style={{ width: '25px', height: '25px' }}>
-                            {theme === 'dark' ? <img src='/logos/bandcamp-dark.png' width='25px' height='25px' /> : <img src='/logos/bandcamp-light.png' width='25px' height='25px' />}
+                            {theme === 'dark' ? <img src='/images/logos/bandcamp-dark.png' width='25px' height='25px' /> : <img src='/images/logos/bandcamp-light.png' width='25px' height='25px' />}
                         </a>
                     </div>
                 </Tooltip>
@@ -93,10 +91,7 @@ const AlbumDetailModal = (
         modalOpened,
         setModalOpened,
         handleCloseModal,
-        toggleModal,
         selectedAlbumInfo,
-        publicationsSelected,
-        chartColorScheme,
         SaveAlbumButton
     }: AlbumDetailModalProps
 ) => {
@@ -106,6 +101,15 @@ const AlbumDetailModal = (
         selectedAlbumInfo?.id ? `/api/albumReviews?album_id=${selectedAlbumInfo?.id}` : null,
         fetcher
     )
+
+    const publicationsSelected = useDataStore((state) => state.publicationsSelected);
+    const chartColorScheme = useDataStore((state) => state.chartColorScheme);
+
+
+    // selectedAlbumInfo?: Album;
+    // publicationsSelected: Publication[];
+    // chartColorScheme: string[];
+    // SaveAlbumButton?: React.ComponentType
 
     const { theme } = useTheme();
 
@@ -120,7 +124,7 @@ const AlbumDetailModal = (
             actions={
                 <>
                     {SaveAlbumButton && <SaveAlbumButton />}
-                    <Button flat label='Close' onClick={toggleModal} />
+                    <Button flat label='Close' onClick={() => setModalOpened(false)} />
                 </>
             }>
             <ModalHeader

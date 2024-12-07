@@ -47,7 +47,7 @@ export default function Publications({ publications }: PublicationProps) {
     const PublicationCard = ({ publication, add }: PublicationCardProps) => {
         return (
             <Card
-                title={<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img className='pub-icon' src={`/images/${publication.unique_name}.webp`} width="30px" height="30px" />
+                title={<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img className='pub-icon' src={`/images/publications/${publication.unique_name}.webp`} width="30px" height="30px" />
                     {publication.name}</div>}
                 style={{ opacity: publicationSelected(publication) && add ? 0.4 : 1 }}
                 actionPosition='right'

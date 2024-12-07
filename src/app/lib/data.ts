@@ -150,7 +150,7 @@ export async function checkIfUserExists(email: string) {
 export async function createUser(email: string, name: string) {
     try {
         const data = await sql<User>`
-        INSERT INTO USERS (email, name, albums_saved) VALUES (${email}, ${name}, '{}')
+        INSERT INTO USERS (email, name) VALUES (${email}, ${name})
         RETURNING *
         `;
         return data;

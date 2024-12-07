@@ -19,13 +19,18 @@ export default function ProjectGoals() {
                             <div>Basic authentication and authorization</div>
                         </div>
                         <div className={styles.bulletPoint}>
+                            <Icon type='none' size="sm" dense icon='bi bi-check-circle-fill' style={{ color: 'green' }} />
+                            <div>Saving albums</div>
+                        </div>
+                        <div className={styles.bulletPoint}>
                             <Icon type='none' size="sm" dense icon='bi bi-circle' />
                             <div>Caching state of application </div>
                         </div>
                         <div className={styles.bulletPoint}>
                             <Icon type='none' size="sm" dense icon='bi bi-circle' />
-                            <div>Saving albums and album lists </div>
+                            <div>Rating Albums </div>
                         </div>
+
                     </div>
                 </Card>
                 <Card title={<div style={{ paddingTop: '20px' }}>Spotify API</div>}>
@@ -52,17 +57,13 @@ export default function ProjectGoals() {
                         </div>
                         <div className={styles.bulletPoint}>
                             <Icon type='none' size="sm" dense icon='bi bi-circle' />
-                            <div>Rating and Saving Albums</div>
-                        </div>
-                        <div className={styles.bulletPoint}>
-                            <Icon type='none' size="sm" dense icon='bi bi-circle' />
                             <div>Filtering based on liked albums and proximity</div>
                         </div>
                     </div>
                 </Card>
 
             </div>
-            <p>Since this is a one-person project, there is no specific deadline for meeting each of these goals. </p>
+            <p>Since this is currently a one-person project, there is no specific deadline for meeting each of these goals. </p>
         </Scrollable>
     )
 }

@@ -73,7 +73,7 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
                         <div key={`tooltip-${review.id}`} style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center', justifyContent: 'flex-start', margin: '5px 0px' }}>
                             <img
                                 className='pub-icon'
-                                src={`/images/${currPublication?.unique_name}.webp`}
+                                src={`/images/publications/${currPublication?.unique_name}.webp`}
                                 width="30px"
                                 height="30px"
                             />
