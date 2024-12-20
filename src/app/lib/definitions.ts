@@ -57,7 +57,6 @@ export interface Album {
     genres: string[],
     subgenres: string[],
     release_date: string,
-    url?: string,
     spotify_url?: string,
     apple_music_url?: string,
     bandcamp_url?: string,
@@ -93,16 +92,3 @@ export interface User {
     email: string,
     password: string
 }
-
-
-
-
-/**
- * Examples
- * 
- * selectedAlbumIds : {2024: { 1: { '7,8' : [ bar_selected_reviews_for_pub_1_2024 ] } } }
- * selectedAlbumIdsRankings: {2024: { 1: [ brushed_rankings_for_pub_1_2024 ] } }
- * 
- * 
- * 
- */
