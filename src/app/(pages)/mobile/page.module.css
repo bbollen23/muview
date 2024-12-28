@@ -1,0 +1,5 @@
+.title {
+  font-family: var(--bp-theme-font-family-title);
+  font-size: 4.0rem;
+  font-weight: bold;
+}
