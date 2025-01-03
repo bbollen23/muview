@@ -39,10 +39,10 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
 
         const val = ((reviews.length * 44) - 52) / 2
         const positionLeft = targetRect.width + 40;
-        let positionTop = targetRect.top - val;
+        let positionTop = targetRect.top - val - 20;
         // let positionTop = targetRect.top
         if (positionTop + (reviews.length * 44) > viewportHeight) {
-            positionTop = targetRect.top - 2 * val - 5; //5 for adding some 'padding'
+            positionTop = targetRect.top - 2 * val - 30; //5 for adding some 'padding'
         }
 
         setPosition({
@@ -65,25 +65,29 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
                 }}
                 className={clsx(styles.albumToolTipSmall, visible ? styles.visible : null)}
             >
-
-                {reviews.map((review: Review) => {
-                    const currPublication = publicationsSelected.find((publication: Publication) => review.publication_id === publication.id);
-                    const pubIndex = publicationsSelected.findIndex(item => item.id === currPublication?.id);
+                {publicationsSelected.map((publication: Publication, idx: number) => {
+                    const rank = rankings.find((entry: Ranking) => entry.publication_id == publication.id) ?
+                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                            #{rankings.find((entry: Ranking) => entry.publication_id == publication.id)?.rank}
+                        </div> : null
+                    const review = reviews.find((entry: Review) => entry.publication_id == publication.id) ?
+                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                            {reviews.find((entry: Review) => entry.publication_id == publication.id)?.score}
+                        </div> : rank ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                            N/A
+                        </div> : null
                     return (
-                        <div key={`tooltip-${review.id}`} style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center', justifyContent: 'flex-start', margin: '5px 0px' }}>
-                            <img
-                                className='pub-icon'
-                                src={`/images/publications/${currPublication?.unique_name}.webp`}
-                                width="30px"
-                                height="30px"
-                            />
-                            <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[pubIndex], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
-                                {review.score}
+                        !review && !rank ? null :
+                            <div key={`tooltip-${publication.id}`} style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center', justifyContent: 'flex-start', margin: '5px 0px' }}>
+                                <img
+                                    className='pub-icon'
+                                    src={`/images/publications/${publication.unique_name}.webp`}
+                                    width="30px"
+                                    height="30px"
+                                />
+                                {review}
+                                {rank}
                             </div>
-                            {rankings.find((entry: Ranking) => entry.publication_id == review.publication_id) ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[pubIndex], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
-                                #{rankings.find((entry: Ranking) => entry.publication_id == review.publication_id)?.rank}
-                            </div> : null}
-                        </div>
                     )
                 })}
             </div>

@@ -46,7 +46,7 @@ const AlbumReviewsChart = ({ reviews, publicationsSelected, chartColorScheme }: 
                 return {
                     label: review.name,
                     score: review.score,
-                    color: pub_index === -1 ? 'steelblue' : chartColorScheme[pub_index],
+                    color: pub_index === -1 ? 'steelblue' : chartColorScheme[pub_index % 6],
                     opacity: pub_index === -1 ? 0.6 : 1
                 }
             })
