@@ -1,5 +1,5 @@
 import { sql, createClient } from '@vercel/postgres';
-import type { Publication, User, Album, Review } from './definitions';
+import type { Publication, User, Album, Review, FetchRankingsResult } from './definitions';
 
 export async function fetchPublications() {
     try {
@@ -52,7 +52,7 @@ export async function fetchRankings(publication_ids: number[], years_list: numbe
         LEFT JOIN reviews as t2
         ON t1.album_id = t2.album_id AND t1.publication_id = t2.publication_id
         WHERE t1.publication_id IN (${publication_ids_string}) AND t1.year IN (${years_string})`);
-        const rankings = data.rows;
+        const rankings: FetchRankingsResult[] = data.rows;
         return rankings;
     } catch (error) {
         console.error('Database Error:', error)

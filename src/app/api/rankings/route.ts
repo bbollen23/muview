@@ -1,5 +1,5 @@
 import { fetchRankings } from '@/app/lib/data'; // Adjust path
-
+import { FetchRankingsResult } from '@/app/lib/definitions';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -16,10 +16,10 @@ export async function GET(request: Request) {
             console.log(hidden)
             console.log(hidden)
             if (!(hidden?.toLowerCase() === 'true')) {
-                const tempData = newRankings.map((entry: any) => { return entry.score === null ? { ...entry, score: "-10" } : entry })
+                const tempData = newRankings.map((entry: FetchRankingsResult) => { return entry.score === null ? { ...entry, score: "-10" } : entry })
                 return Response.json({ newRankings: tempData, origRankings: newRankings })
             }
-            const tempData = newRankings.filter((entry: any) => entry.score)
+            const tempData = newRankings.filter((entry: FetchRankingsResult) => entry.score)
             return Response.json({ newRankings: tempData, origRankings: newRankings })
 
 

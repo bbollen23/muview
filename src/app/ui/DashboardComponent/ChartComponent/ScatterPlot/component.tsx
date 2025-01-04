@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
-import type { Publication } from '@/app/lib/definitions';
+import type { FetchRankingsResult, Publication } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import useSWR from 'swr';
 import { LoadingIcon } from '@bbollen23/brutal-paper';
@@ -56,7 +56,7 @@ const ScatterPlot = ({ publication_id, years, setErrorNumber, hidden }: ScatterP
     useEffect(() => {
         if (data) {
             addRankings(data.newRankings, years);
-            setErrorNumber(data.origRankings.filter((entry: any) => entry.score === null).length)
+            setErrorNumber(data.origRankings.filter((entry: FetchRankingsResult) => entry.score === null).length)
         }
     }, [data])
 
