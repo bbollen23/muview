@@ -8,6 +8,15 @@ export interface Publication {
 }
 
 
+export interface FetchRankingsResult {
+    id: number;
+    publication_id: number;
+    album_id: number;
+    rank: number;
+    year: number;
+    score: number | null;
+}
+
 export interface BinnedAlbums {
     [key: string]: Album[]
 }
@@ -65,7 +74,7 @@ export interface Album {
 }
 
 export interface AlbumWithScore extends Album {
-    avg_score: number;
+    avg_score: number | null;
     reviews: Review[];
 }
 

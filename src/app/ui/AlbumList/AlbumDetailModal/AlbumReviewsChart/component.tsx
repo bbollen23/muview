@@ -46,7 +46,7 @@ const AlbumReviewsChart = ({ reviews, publicationsSelected, chartColorScheme }: 
                 return {
                     label: review.name,
                     score: review.score,
-                    color: pub_index === -1 ? 'steelblue' : chartColorScheme[pub_index],
+                    color: pub_index === -1 ? 'steelblue' : chartColorScheme[pub_index % 6],
                     opacity: pub_index === -1 ? 0.6 : 1
                 }
             })
@@ -58,8 +58,6 @@ const AlbumReviewsChart = ({ reviews, publicationsSelected, chartColorScheme }: 
             // Step 2: Calculate the standard deviation
             const variance = reviewsData.reduce((sum, item) => sum + Math.pow(parseInt(item.score.toString()) - mean, 2), 0) / reviewsData.length;
             const stdDev = Math.sqrt(variance);
-
-            console.log(mean, stdDev)
 
             setMeanData([
                 {

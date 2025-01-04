@@ -40,7 +40,6 @@ interface AlbumReviewChartWrapperProps {
 
 
 const AlbumReviewChartWrapper = ({ loading, chartColorScheme, publications, data }: AlbumReviewChartWrapperProps) => {
-    console.log(loading)
     if (loading) return (
         <div style={{ width: '625px', height: '250px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ fontSize: '1.0rem' }}>Loading Reviews</div><LoadingIcon visible={true} />

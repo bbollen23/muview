@@ -59,3 +59,18 @@
     align-items: center;
     gap: 40px;
 }
+
+.error {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    margin-right: 10px;
+
+}
+
+.error:hover {
+    background-color: var(--bp-theme-item-hover-color-dark);
+}
