@@ -384,7 +384,6 @@ export const createDataStore = (
         },
         brushSelection: (x1: number, x2: number, y1: number, y2: number, x: number, y: number, width: number, height: number, years: number[], publication_id: number) => {
             set((state) => {
-                console.log(x1, x2, y1, y2, x, y, width, height);
                 const updatedAlbumIds: AlbumIdsSelectedRanking = { ...state.selectedAlbumIdsRankings }
                 const updatedBrushState = { ...state.brushState }
                 years.forEach((year) => {

@@ -37,6 +37,8 @@ const ScatterPlot = ({ publication_id, years, setErrorNumber, hidden }: ScatterP
     const addRankings = useDataStore((state) => state.addRankings);
     const brushState = useDataStore((state) => state.brushState);
 
+    const [hasMounted, setHasMounted] = useState(false);
+
     // Used only to render initial state when re-mounting
     const [currBrushState, setBrushState] = useState({
         x: 0,
@@ -61,13 +63,16 @@ const ScatterPlot = ({ publication_id, years, setErrorNumber, hidden }: ScatterP
     }, [data])
 
     useEffect(() => {
-        setBrushState({
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0
-        });
-        brushSelection(0, 0, 0, 0, 0, 0, 0, 0, years, publication_id)
+        // Should not run when mounted.
+        if (hasMounted) {
+            setBrushState({
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0
+            });
+            brushSelection(0, 0, 0, 0, 0, 0, 0, 0, years, publication_id)
+        }
     }, [hidden])
 
     useEffect(() => {
@@ -77,6 +82,7 @@ const ScatterPlot = ({ publication_id, years, setErrorNumber, hidden }: ScatterP
         if (brushState[years[0]] && brushState[years[0]][publication_id]) {
             setBrushState(brushState[years[0]][publication_id])
         }
+        setHasMounted(true)
     }, [])
 
 

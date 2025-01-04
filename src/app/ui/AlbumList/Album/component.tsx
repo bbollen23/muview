@@ -15,7 +15,7 @@ interface AlbumComponentProps {
     album: Album,
     reviews: Review[],
     rankings: Ranking[],
-    avgScore: number,
+    avgScore: number | null,
     onClick?: () => void;
 }
 
@@ -118,7 +118,7 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
                 </div>
                 <div className={styles.right}>
                     <div className={styles.review}>
-                        <div style={{ marginTop: 0, fontSize: '0.9rem', marginRight: '5px' }} className={styles.score}>{avgScore}</div>
+                        <div style={{ marginTop: 0, fontSize: '0.9rem', marginRight: '5px' }} className={styles.score}>{avgScore ?? 'N/A'}</div>
                     </div>
                 </div>
             </div>

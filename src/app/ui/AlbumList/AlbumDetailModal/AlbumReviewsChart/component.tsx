@@ -59,8 +59,6 @@ const AlbumReviewsChart = ({ reviews, publicationsSelected, chartColorScheme }: 
             const variance = reviewsData.reduce((sum, item) => sum + Math.pow(parseInt(item.score.toString()) - mean, 2), 0) / reviewsData.length;
             const stdDev = Math.sqrt(variance);
 
-            console.log(mean, stdDev)
-
             setMeanData([
                 {
                     label: 'Average Score',

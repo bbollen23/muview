@@ -74,7 +74,7 @@ export interface Album {
 }
 
 export interface AlbumWithScore extends Album {
-    avg_score: number;
+    avg_score: number | null;
     reviews: Review[];
 }
 
