@@ -52,7 +52,7 @@ export interface SelectedAlbumInfo {
     album: AlbumWithScore,
     reviews: Review[],
     rankings: Ranking[],
-    avgScore: number,
+    avgScore: number | null,
 }
 
 const AlbumList = () => {
@@ -158,13 +158,15 @@ const AlbumList = () => {
 
             const albumWithScore = {
                 ...album,
-                avgScore: 0,
+                avgScore: null,
                 reviews
             }
-            let avgScore = 0;
+            let avgScore: number | null = 0;
             if (albumWithScore.reviews && albumWithScore.reviews.length > 0) {
                 const totalScore = albumWithScore.reviews.reduce((sum, review) => sum + parseFloat(review.score.toString()), 0);
                 avgScore = Math.round((totalScore / albumWithScore.reviews.length)) / 10; // Set average score
+            } else {
+                avgScore = null
             }
             return {
                 ...albumWithScore,
@@ -239,7 +241,7 @@ const AlbumList = () => {
         setModalOpened((prev) => !prev);
     }
 
-    const handleAlbumClick = (album: AlbumWithScore, reviews: Review[], rankings: Ranking[], avgScore: number) => {
+    const handleAlbumClick = (album: AlbumWithScore, reviews: Review[], rankings: Ranking[], avgScore: number | null) => {
         setSelectedAlbumInfo({
             album,
             reviews,

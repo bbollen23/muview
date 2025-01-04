@@ -20,7 +20,7 @@ function Dashboard({ }) {
   const combineYearsDashboard = useDataStore((state) => state.combineYearsDashboard);
   const toggleCombineYears = useDataStore((state) => state.toggleCombineYears);
 
-  const yearsList: string[] = ['2024', '2023', '2022', '2021', '2020'];
+  const yearsList: string[] = ['2025', '2024', '2023', '2022', '2021', '2020'];
 
   const [yearClickState, setYearClickState] = useState<boolean[]>(yearsList.map((year: string) => selectedYears.includes(parseInt(year))));
 

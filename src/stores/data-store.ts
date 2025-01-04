@@ -2,7 +2,12 @@ import { createStore } from 'zustand/vanilla'
 import type { Filter, Publication, Review, Ranking, CurrentReviews, CurrentRankings, AlbumIdsSelected, AlbumIdsSelectedRanking, CurrentBarChartMetadata } from '@/app/lib/definitions';
 
 
-
+export interface BrushState {
+    x: number,
+    y: number,
+    width: number,
+    height: number
+}
 
 export type DataStoreState = {
     // Used
@@ -17,6 +22,8 @@ export type DataStoreState = {
     upsetConsolidate: boolean;
     upsetInclusive: boolean;
     barChartMetadata: CurrentBarChartMetadata;
+    brushState: Record<string, Record<string, BrushState>>;
+    noScoreRankHiddenState: Record<string, Record<string, boolean>>;
 
     // Coloring
     chartColorScheme: string[];
@@ -38,7 +45,7 @@ export type DataStoreActions = {
     clickBarSelection: (bin0: number, bin1: number, publication_id: number, years: number[]) => void;
     clearBarSelection: (publication_id: number, years: number[]) => void;
     selectAllBarSelection: (publication_id: number, years: number[]) => void;
-    brushSelection: (x1: number, x2: number, y1: number, y2: number, years: number[], publication_id: number) => void;
+    brushSelection: (x1: number, x2: number, y1: number, y2: number, x: number, y: number, width: number, height: number, years: number[], publication_id: number) => void;
     addReviews: (reviews: Review[], years: number[]) => void;
     addRankings: (rankings: Ranking[], years: number[]) => void;
     setSelectedYears: (year: string[]) => void;
@@ -47,6 +54,7 @@ export type DataStoreActions = {
     removeFilter: (filter: Filter) => void;
     toggleConsolidate: () => void;
     toggleInclusive: () => void;
+    toggleNoScoreRankHiddenState: (years: number[], publication_id: number) => void;
 
 
     // Currently Unused
@@ -78,7 +86,9 @@ export const defaultInitialState: DataStoreState = {
     filterPlotBarColors: {},
     upsetConsolidate: false,
     upsetInclusive: false,
-    barChartMetadata: {}
+    barChartMetadata: {},
+    brushState: {},
+    noScoreRankHiddenState: {}
 }
 
 export const initDataStore = (): DataStoreState => {
@@ -111,7 +121,9 @@ export const initDataStore = (): DataStoreState => {
         },
         upsetConsolidate: false,
         upsetInclusive: false,
-        barChartMetadata: {}
+        barChartMetadata: {},
+        brushState: {},
+        noScoreRankHiddenState: {}
 
     }
 }
@@ -370,22 +382,45 @@ export const createDataStore = (
                 }
             })
         },
-        brushSelection: (x1: number, x2: number, y1: number, y2: number, years: number[], publication_id: number) => {
+        brushSelection: (x1: number, x2: number, y1: number, y2: number, x: number, y: number, width: number, height: number, years: number[], publication_id: number) => {
             set((state) => {
                 const updatedAlbumIds: AlbumIdsSelectedRanking = { ...state.selectedAlbumIdsRankings }
-
+                const updatedBrushState = { ...state.brushState }
                 years.forEach((year) => {
-                    const tempAlbumIds = [...state.rankings[year][publication_id]].filter((ranking: Ranking) => ranking.rank >= Math.min(x1, x2) && ranking.rank <= Math.max(x1, x2) && ranking.score >= Math.min(y1, y2) && ranking.score <= Math.max(y1, y2)).map((entry: Ranking) => entry.album_id);
+                    if (state.rankings[year] && state.rankings[year][publication_id]) {
+                        const tempAlbumIds = [...state.rankings[year][publication_id]].filter((ranking: Ranking) => ranking.rank >= Math.min(x1, x2) && ranking.rank <= Math.max(x1, x2) && ranking.score >= Math.min(y1, y2) && ranking.score <= Math.max(y1, y2)).map((entry: Ranking) => entry.album_id);
 
-                    if (!updatedAlbumIds[year]) {
-                        updatedAlbumIds[year] = {};
+                        if (!updatedAlbumIds[year]) {
+                            updatedAlbumIds[year] = {};
+                        }
+
+                        if (!updatedBrushState[year]) {
+                            updatedBrushState[year] = {}
+                        }
+
+                        updatedAlbumIds[year][publication_id] = tempAlbumIds;
+                        updatedBrushState[year][publication_id] = { x, y, width, height };
                     }
 
-                    updatedAlbumIds[year][publication_id] = tempAlbumIds;
                 })
 
                 return {
-                    selectedAlbumIdsRankings: updatedAlbumIds
+                    selectedAlbumIdsRankings: updatedAlbumIds,
+                    brushState: updatedBrushState
+                }
+            })
+        },
+        toggleNoScoreRankHiddenState: (years: number[], publication_id: number) => {
+            set((state) => {
+                const updatedHiddenState = { ...state.noScoreRankHiddenState }
+                years.forEach((year) => {
+                    if (!updatedHiddenState[year]) {
+                        updatedHiddenState[year] = {}
+                    }
+                    updatedHiddenState[year][publication_id] = updatedHiddenState[year][publication_id] === undefined ? false : !updatedHiddenState[year][publication_id]
+                })
+                return {
+                    noScoreRankHiddenState: updatedHiddenState
                 }
             })
         }

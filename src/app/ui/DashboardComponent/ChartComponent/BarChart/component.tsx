@@ -60,7 +60,7 @@ const BarChart = ({ publication_id, years }: BarChartProps): JSX.Element => {
     const initializeBarChart = useDataStore((state) => state.initializeBarChart);
 
 
-    const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
+    const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id) % 6]
 
     // Generate state for tracking marks for clicked bars
     const [clickedData, setClickedData] = useState<BarData[]>([]);

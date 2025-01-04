@@ -1,9 +1,9 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Vega } from "react-vega";
 import { getCSSVariableValue } from '@/app/lib/getCSSVariableValue';
 import { useTheme } from '@/providers/theme-provider';
-import type { Publication } from '@/app/lib/definitions';
+import type { FetchRankingsResult, Publication } from '@/app/lib/definitions';
 import { useDataStore } from "@/providers/data-store-provider";
 import useSWR from 'swr';
 import { LoadingIcon } from '@bbollen23/brutal-paper';
@@ -11,44 +11,86 @@ import { fetcher } from '@/app/lib/fetcher';
 
 
 interface ScatterPlotProps {
-    publication_id: number,
-    years: number[]
+    publication_id: number;
+    years: number[];
+    setErrorNumber: React.Dispatch<React.SetStateAction<number>>;
+    hidden: boolean;
 }
 
 interface BrushSelectionData {
     x1: number,
     x2: number,
     y1: number,
-    y2: number
+    y2: number,
+    x: number;
+    y: number;
+    width: number;
+    height: number
 }
 
 
-const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element => {
+const ScatterPlot = ({ publication_id, years, setErrorNumber, hidden }: ScatterPlotProps): JSX.Element => {
 
     const publicationsSelected = useDataStore((state) => state.publicationsSelected);
     const chartColorScheme = useDataStore((state => state.chartColorScheme));
     const brushSelection = useDataStore((state => state.brushSelection))
     const addRankings = useDataStore((state) => state.addRankings);
+    const brushState = useDataStore((state) => state.brushState);
 
-    const { data, error, isLoading } = useSWR(`/api/rankings?publication_ids=${[publication_id]}&years=${years}`, fetcher)
+    const [hasMounted, setHasMounted] = useState(false);
 
-    // const rankingData = rankings[publication_id];
+    // Used only to render initial state when re-mounting
+    const [currBrushState, setBrushState] = useState({
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+    });
 
-    const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id)]
+    const { data, error, isLoading } = useSWR(`/api/rankings?publication_ids=${[publication_id]}&years=${years}&hidden=${hidden}`, fetcher)
 
+    const color = chartColorScheme[publicationsSelected.findIndex(item => item.id === publication_id) % 6]
 
     const { theme } = useTheme();
+
+
 
     useEffect(() => {
         if (data) {
             addRankings(data.newRankings, years);
+            setErrorNumber(data.origRankings.filter((entry: FetchRankingsResult) => entry.score === null).length)
         }
     }, [data])
 
+    useEffect(() => {
+        // Should not run when mounted.
+        if (hasMounted) {
+            setBrushState({
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0
+            });
+            brushSelection(0, 0, 0, 0, 0, 0, 0, 0, years, publication_id)
+        }
+    }, [hidden])
+
+    useEffect(() => {
+        // Only uses first year in list.
+        // If single year, only uses single year.
+        // If multiple years, each year is set to the same brush. Taking any will work.
+        if (brushState[years[0]] && brushState[years[0]][publication_id]) {
+            setBrushState(brushState[years[0]][publication_id])
+        }
+        setHasMounted(true)
+    }, [])
+
+
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleBrushData = (name: string, value: any) => {
-        const { x1, x2, y1, y2 } = value as BrushSelectionData;
-        brushSelection(x1, x2, y1, y2, years, publication_id);
+        const { x1, x2, y1, y2, x, y, width, height } = value as BrushSelectionData;
+        brushSelection(x1, x2, y1, y2, x, y, width, height, years, publication_id);
     }
 
 
@@ -63,10 +105,13 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
             "$schema": "https://vega.github.io/schema/vega/v5.json",
             "width": 450,
             "height": 275,
-            "data": {
+            "data": [{
                 "name": "table",
                 "values": data.newRankings
-            },
+            }, {
+                "name": "brushTable",
+                "values": currBrushState
+            }],
             "autosize": {
                 "type": "none",
                 "contains": "padding"
@@ -127,7 +172,16 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
                     "gridDash": [4, 4],
                     "gridOpacity": 0.2,
                     "gridColor": `${getCSSVariableValue('--bp-theme-text-color', theme)}`,
-                    "tickCount": 10
+                    "tickCount": 10,
+                    "encode": {
+                        "labels": {
+                            "update": {
+                                "text": {
+                                    "signal": "datum.value === -10 ? 'No Score' : datum.value"
+                                }
+                            }
+                        }
+                    }
                 }
             ],
 
@@ -144,7 +198,6 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
                             "stroke": { "value": "black" },
                             "strokeWidth": { "value": 2 },
                             "fill": { "value": "#334155" }, // Semi-transparent fill
-                            "fillOpacity": { "value": 0.1 }
                         }
                     }
                 },
@@ -154,16 +207,20 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
                     "encode": {
                         "enter": {
                             "x": { "scale": "xscale", "field": "rank" },
-                            "y": { "scale": "yscale", "field": "score" },
+                            "y": {
+                                "scale": "yscale",
+                                "field": "score",
+                            },
                             "size": { "value": 100 },
-                            "fill": { "value": color },
+                            "fill": {
+                                "signal": `datum.score < 0 ? 'white' : '${color}'`
+                            },
                             "stroke": { "value": "black" }
                         },
                         "update": {
                             "fillOpacity": {
                                 "signal": "scale('xscale', datum.rank) >= min(brush.x, brush.x + brush.width) && scale('xscale', datum.rank) <= max(brush.x, brush.x + brush.width) && scale('yscale', datum.score) >= min(brush.y, brush.y + brush.height) && scale('yscale', datum.score) <= max(brush.y, brush.y + brush.height)  ? 1 : brush.width && abs(brush.width) > 3 ? 0.3 : 1 "
                             },
-
                         }
                     }
                 }
@@ -172,7 +229,7 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
             "signals": [
                 {
                     "name": "isMoving",  // Boolean to track if the mouse is down
-                    "value": true,
+                    "value": false,
                     "on": [
                         {
                             "events": "mousedown",
@@ -226,7 +283,7 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
                 },
                 {
                     "name": "brush",
-                    "value": {},
+                    "value": currBrushState ?? {},
                     "on": [
                         {
                             "events": "mousedown",
@@ -262,7 +319,7 @@ const ScatterPlot = ({ publication_id, years }: ScatterPlotProps): JSX.Element =
                     "on": [
                         {
                             "events": "mouseup",
-                            "update": "{x1:invert('xscale', brush.x), y1:invert('yscale', brush.y), x2:invert('xscale', brush.x + brush.width), y2:invert('yscale', brush.y + brush.height)}"
+                            "update": "{x1:invert('xscale', brush.x), y1:invert('yscale', brush.y), x2:invert('xscale', brush.x + brush.width), y2:invert('yscale', brush.y + brush.height), x: brush.x, y:brush.y, width:brush.width, height:brush.height}"
                         }
                     ]
                 },
