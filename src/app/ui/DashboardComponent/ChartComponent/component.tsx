@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import type { Publication } from "@/app/lib/definitions";
 import styles from "./component.module.scss";

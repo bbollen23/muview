@@ -67,13 +67,13 @@ const AlbumComponent = ({ onClick, avgScore, album, reviews, rankings }: AlbumCo
             >
                 {publicationsSelected.map((publication: Publication, idx: number) => {
                     const rank = rankings.find((entry: Ranking) => entry.publication_id == publication.id) ?
-                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[idx % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
                             #{rankings.find((entry: Ranking) => entry.publication_id == publication.id)?.rank}
                         </div> : null
                     const review = reviews.find((entry: Review) => entry.publication_id == publication.id) ?
-                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                        <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[idx % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
                             {reviews.find((entry: Review) => entry.publication_id == publication.id)?.score}
-                        </div> : rank ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[publication.id % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
+                        </div> : rank ? <div className={styles.score} style={{ color: 'hsl(var(--gray-100))', backgroundColor: chartColorScheme[idx % 6], width: '30px', height: '30px', marginTop: 0, border: '2px solid black' }}>
                             N/A
                         </div> : null
                     return (
