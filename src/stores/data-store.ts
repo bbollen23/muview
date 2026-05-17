@@ -97,8 +97,8 @@ export const initDataStore = (): DataStoreState => {
         reviews: {},
         rankings: {},
         loading: false,
-        selectedYear: '2024',
-        selectedYears: [2024],
+        selectedYear: '2026',
+        selectedYears: [2026],
         chartColorScheme: [
             "#2563EB", //blue 600
             "#65A30D", // lime 600
